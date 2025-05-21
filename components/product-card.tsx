@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Heart, ShoppingCart } from "lucide-react"
 import { useCart } from "@/hooks/use-cart"
+import { useFavorites } from "@/hooks/use-favorites"
 
 interface Product {
   id: number
@@ -16,11 +17,30 @@ interface Product {
 interface ProductCardProps {
   product: Product
   featured?: boolean
+  isFavorite?: boolean
 }
 
-export default function ProductCard({ product, featured = false }: ProductCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false)
+export default function ProductCard({
+  product,
+  featured = false,
+  isFavorite: initialFavorite = false,
+}: ProductCardProps) {
   const { addToCart } = useCart()
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites()
+  const [isProductFavorite, setIsProductFavorite] = useState(initialFavorite)
+
+  useEffect(() => {
+    setIsProductFavorite(isFavorite(product.id) || initialFavorite)
+  }, [product.id, isFavorite, initialFavorite])
+
+  const handleFavoriteToggle = () => {
+    if (isProductFavorite) {
+      removeFromFavorites(product.id)
+    } else {
+      addToFavorites(product)
+    }
+    setIsProductFavorite(!isProductFavorite)
+  }
 
   return (
     <div
@@ -41,11 +61,8 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
         {featured && (
           <div className="absolute top-2 left-2 bg-rose-500 text-white text-xs px-2 py-1 rounded-full">Featured</div>
         )}
-        <button
-          className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm"
-          onClick={() => setIsFavorite(!isFavorite)}
-        >
-          <Heart className={`h-5 w-5 ${isFavorite ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
+        <button className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm" onClick={handleFavoriteToggle}>
+          <Heart className={`h-5 w-5 ${isProductFavorite ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
         </button>
       </div>
       <div className="p-3">

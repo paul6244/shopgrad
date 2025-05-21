@@ -3,6 +3,7 @@
 import { X, Trash2, ShoppingBag } from "lucide-react"
 import { useCart } from "@/hooks/use-cart"
 import Image from "next/image"
+import Link from "next/link"
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -66,7 +67,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           alt={item.name}
                           fill
                           className="object-cover"
-                          unoptimized={item.image.startsWith("http")} // Add this line to handle external URLs
+                          unoptimized={item.image.startsWith("http")}
                         />
                       </div>
                       <div className="ml-4 flex-1 flex flex-col">
@@ -115,12 +116,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   <p>Subtotal</p>
                   <p>${cartTotal.toFixed(2)}</p>
                 </div>
-                <button
-                  type="button"
-                  className="w-full bg-gradient-to-r from-rose-400 to-purple-500 text-white py-3 px-4 rounded-full font-medium hover:from-rose-500 hover:to-purple-600 transition-colors"
+                <Link
+                  href="/checkout"
+                  className="w-full bg-gradient-to-r from-rose-400 to-purple-500 text-white py-3 px-4 rounded-full font-medium hover:from-rose-500 hover:to-purple-600 transition-colors flex items-center justify-center"
+                  onClick={onClose}
                 >
+                  <ShoppingBag className="h-5 w-5 mr-2" />
                   Checkout
-                </button>
+                </Link>
                 <div className="mt-4 flex justify-center text-sm text-gray-500">
                   <button type="button" className="text-rose-400 hover:text-rose-500" onClick={onClose}>
                     Continue Shopping

@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, ShoppingBag } from "lucide-react"
 import ProductCard from "@/components/product-card"
 import CartDrawer from "@/components/cart-drawer"
 import { useCart } from "@/hooks/use-cart"
 import { useAuth } from "@/hooks/use-auth"
+import { useFavorites } from "@/hooks/use-favorites"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
-// Expanded product data
+// Sample product data
 const products = [
   {
     id: 1,
@@ -130,6 +132,15 @@ export default function ShoppingApp() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const { cartItems, cartTotal } = useCart()
   const { user } = useAuth()
+  const { isFavorite } = useFavorites()
+  const searchParams = useSearchParams()
+  const categoryParam = searchParams.get("category")
+
+  useEffect(() => {
+    if (categoryParam) {
+      setSearchQuery(categoryParam)
+    }
+  }, [categoryParam])
 
   const filteredProducts = products.filter(
     (product) =>
@@ -199,7 +210,12 @@ export default function ShoppingApp() {
           {["All", "Electronics", "Fashion", "Home", "Fitness"].map((category) => (
             <button
               key={category}
-              className="px-4 py-2 bg-white rounded-full text-sm font-medium whitespace-nowrap hover:bg-rose-100 transition-colors"
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                (category === "All" && !searchQuery) ||
+                (category !== "All" && searchQuery.toLowerCase() === category.toLowerCase())
+                  ? "bg-rose-500 text-white"
+                  : "bg-white hover:bg-rose-100"
+              }`}
               onClick={() => setSearchQuery(category === "All" ? "" : category)}
             >
               {category}
@@ -212,7 +228,7 @@ export default function ShoppingApp() {
           <h2 className="text-xl font-bold mb-4 text-white">Featured Products</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.slice(6, 9).map((product) => (
-              <ProductCard key={product.id} product={product} featured />
+              <ProductCard key={product.id} product={product} featured isFavorite={isFavorite(product.id)} />
             ))}
           </div>
         </div>
@@ -221,13 +237,26 @@ export default function ShoppingApp() {
         <h2 className="text-xl font-bold mb-4 text-white">All Products</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} isFavorite={isFavorite(product.id)} />
           ))}
         </div>
 
         {filteredProducts.length === 0 && (
           <div className="text-center py-10">
-            <p className="text-lg text-gray-600">No products found matching "{searchQuery}"</p>
+            <p className="text-lg text-white">No products found matching "{searchQuery}"</p>
+          </div>
+        )}
+
+        {/* Checkout Button */}
+        {cartItems.length > 0 && (
+          <div className="fixed bottom-20 left-0 right-0 flex justify-center z-10 px-4">
+            <Link
+              href="/checkout"
+              className="bg-gradient-to-r from-rose-500 to-purple-600 text-white py-3 px-8 rounded-full shadow-lg font-medium flex items-center"
+            >
+              <ShoppingBag className="h-5 w-5 mr-2" />
+              Checkout (${cartTotal.toFixed(2)})
+            </Link>
           </div>
         )}
       </main>
@@ -242,8 +271,12 @@ export default function ShoppingApp() {
               { name: "Favorites", href: "/favorites" },
               { name: "Profile", href: user ? "/profile" : "/login" },
             ].map((item) => (
-              <Link key={item.name} href={item.href} className="flex flex-col items-center">
-                <span className="text-sm font-medium">{item.name}</span>
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex flex-col items-center ${item.name === "Home" ? "text-rose-500 font-medium" : ""}`}
+              >
+                <span className="text-sm">{item.name}</span>
               </Link>
             ))}
           </div>
