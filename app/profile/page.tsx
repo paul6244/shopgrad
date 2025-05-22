@@ -52,7 +52,8 @@ export default function ProfilePage() {
             <div className="space-y-3 sm:space-y-4">
               <Link
                 href="/profile/orders"
-                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400"
+                tabIndex={0}
               >
                 <div className="flex items-center">
                   <ShoppingBag className="h-5 w-5 mr-3 text-rose-500" />
@@ -63,7 +64,8 @@ export default function ProfilePage() {
 
               <Link
                 href="/profile/wishlist"
-                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400"
+                tabIndex={0}
               >
                 <div className="flex items-center">
                   <Heart className="h-5 w-5 mr-3 text-rose-500" />
@@ -74,7 +76,8 @@ export default function ProfilePage() {
 
               <Link
                 href="/profile/settings"
-                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400"
+                tabIndex={0}
               >
                 <div className="flex items-center">
                   <Settings className="h-5 w-5 mr-3 text-rose-500" />
