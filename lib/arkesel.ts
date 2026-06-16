@@ -22,12 +22,38 @@ interface ArkeselResponse {
 // Only initialize if API key is configured
 const apiKey = process.env.ARKESEL_API_KEY
 
+// Helper function to validate phone number format
+function isValidPhone(phone: string): boolean {
+  // Basic phone validation - adjust regex based on your requirements
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/
+  return phoneRegex.test(phone.replace(/\s/g, ''))
+}
+
+// Helper function to validate email format
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
 export async function sendSMS({ phone, message, sender = 'ShopGrad' }: SendSMSParams): Promise<ArkeselResponse> {
   if (!apiKey) {
     throw new Error('Arkesel API key is not configured')
   }
 
+  // Validate phone number
+  if (!phone || !isValidPhone(phone)) {
+    throw new Error('Invalid phone number format')
+  }
+
+  // Validate message
+  if (!message || message.trim().length === 0) {
+    throw new Error('Message cannot be empty')
+  }
+
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
     const response = await fetch('https://sms.arkesel.com/api/v2/sms/send', {
       method: 'POST',
       headers: {
@@ -38,13 +64,16 @@ export async function sendSMS({ phone, message, sender = 'ShopGrad' }: SendSMSPa
         sender: sender,
         message: message,
         recipients: [phone]
-      })
+      }),
+      signal: controller.signal
     })
+
+    clearTimeout(timeoutId)
 
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to send SMS via Arkesel')
+      throw new Error(data?.message || 'Failed to send SMS via Arkesel')
     }
 
     return {
@@ -63,7 +92,25 @@ export async function sendEmail({ email, subject, message, sender = 'ShopGrad' }
     throw new Error('Arkesel API key is not configured')
   }
 
+  // Validate email
+  if (!email || !isValidEmail(email)) {
+    throw new Error('Invalid email format')
+  }
+
+  // Validate subject
+  if (!subject || subject.trim().length === 0) {
+    throw new Error('Subject cannot be empty')
+  }
+
+  // Validate message
+  if (!message || message.trim().length === 0) {
+    throw new Error('Message cannot be empty')
+  }
+
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
     const response = await fetch('https://api.arkesel.com/api/v2/email/send', {
       method: 'POST',
       headers: {
@@ -75,13 +122,16 @@ export async function sendEmail({ email, subject, message, sender = 'ShopGrad' }
         recipients: [email],
         subject: subject,
         html: message
-      })
+      }),
+      signal: controller.signal
     })
+
+    clearTimeout(timeoutId)
 
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to send email via Arkesel')
+      throw new Error(data?.message || 'Failed to send email via Arkesel')
     }
 
     return {

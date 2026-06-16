@@ -18,6 +18,30 @@ interface AuthContextType {
   updateProfile: (data: { name?: string; email?: string; phone?: string }) => void
 }
 
+// Helper function to validate password strength
+function isValidPassword(password: string): boolean {
+  if (!password || password.length < 8) {
+    return false
+  }
+  // Check for at least one lowercase letter
+  if (!/[a-z]/.test(password)) {
+    return false
+  }
+  // Check for at least one uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    return false
+  }
+  // Check for at least one number
+  if (!/\d/.test(password)) {
+    return false
+  }
+  // Check for at least one special character
+  if (!/[^a-zA-Z0-9]/.test(password)) {
+    return false
+  }
+  return true
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -25,9 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check if user is already logged in
   useEffect(() => {
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
+    if (typeof window !== 'undefined') {
+      try {
+        const storedUser = localStorage.getItem("user")
+        if (storedUser) {
+          setUser(JSON.parse(storedUser))
+        }
+      } catch (error) {
+        console.error('Failed to read user from localStorage:', error)
+      }
     }
   }, [])
 
@@ -37,14 +67,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         // Simple validation
-        if (email && password.length >= 6) {
+        if (email && isValidPassword(password)) {
           const user = {
             id: "user-1",
             name: email.split("@")[0],
             email,
           }
           setUser(user)
-          localStorage.setItem("user", JSON.stringify(user))
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem("user", JSON.stringify(user))
+            } catch (error) {
+              console.error('Failed to save user to localStorage:', error)
+            }
+          }
           resolve()
         } else {
           reject(new Error("Invalid credentials"))
@@ -59,14 +95,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         // Simple validation
-        if (email && password.length >= 6) {
+        if (email && isValidPassword(password)) {
           const user = {
             id: "user-" + Math.floor(Math.random() * 1000),
             name: fullName || email.split("@")[0],
             email,
           }
           setUser(user)
-          localStorage.setItem("user", JSON.stringify(user))
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem("user", JSON.stringify(user))
+            } catch (error) {
+              console.error('Failed to save user to localStorage:', error)
+            }
+          }
           resolve()
         } else {
           reject(new Error("Invalid credentials"))
@@ -119,20 +161,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         phone: method === 'sms' ? phone : undefined,
       }
       setUser(user)
-      localStorage.setItem("user", JSON.stringify(user))
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem("user", JSON.stringify(user))
+        } catch (error) {
+          console.error('Failed to save user to localStorage:', error)
+        }
+      }
     }
   }
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem("user")
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem("user")
+      } catch (error) {
+        console.error('Failed to remove user from localStorage:', error)
+      }
+    }
   }
 
-  const updateProfile = (data: { name?: string; email?: string }) => {
+  const updateProfile = (data: { name?: string; email?: string; phone?: string }) => {
     if (user) {
       const updatedUser = { ...user, ...data }
       setUser(updatedUser)
-      localStorage.setItem("user", JSON.stringify(updatedUser))
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem("user", JSON.stringify(updatedUser))
+        } catch (error) {
+          console.error('Failed to save user to localStorage:', error)
+        }
+      }
     }
   }
 
