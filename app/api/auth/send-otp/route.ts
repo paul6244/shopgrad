@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resend } from '@/lib/resend'
-import { account } from '@/lib/appwrite'
+import { databases, DATABASE_ID, ID } from '@/lib/appwrite'
 import { sendSMSOTP, sendEmailOTP } from '@/lib/arkesel'
 
-// Shared in-memory OTP storage (must match verify-otp storage)
-// Using global to share between route instances
-declare global {
-  var otpStore: Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email'; userId?: string }>
-}
+// OTP collection ID - add this to your Appwrite collections
+const OTP_COLLECTION_ID = 'otps'
 
-if (!global.otpStore) {
-  global.otpStore = new Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email'; userId?: string }>()
+interface OTPDocument {
+  identifier: string // phone or email
+  otp: string
+  expiresAt: number
+  method: 'sms' | 'email'
+  userId?: string
 }
-
-const otpStore = global.otpStore
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,82 +29,66 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Method must be either "sms" or "email"' }, { status: 400 })
     }
 
-    // SMS Method - Try Arkesel first, then Appwrite Phone Auth
+    // SMS Method - Use Arkesel
     if (method === 'sms') {
-      // Try Arkesel first
-      if (process.env.ARKESEL_API_KEY) {
-        try {
-          // Generate OTP
-          const otp = Math.floor(100000 + Math.random() * 900000).toString()
-          const expiresAt = Date.now() + 5 * 60 * 1000
-          
-          // Store OTP for verification
-          otpStore.set(phone, { otp, expiresAt, method: 'sms' })
-          
-          // Send OTP via Arkesel
-          await sendSMSOTP(phone, otp)
-          
-          return NextResponse.json({ 
-            success: true, 
-            message: 'OTP sent successfully via Arkesel SMS',
-            method: 'sms'
-          })
-        } catch (arkeselError) {
-          console.error('Arkesel error, falling back to Appwrite:', arkeselError)
-          // Fall through to Appwrite
-        }
+      if (!process.env.ARKESEL_API_KEY) {
+        return NextResponse.json({ error: 'Arkesel API key is not configured' }, { status: 500 })
       }
       
-      // Fallback to Appwrite Phone Auth
       try {
-        // Appwrite uses createPhoneToken to send SMS
-        const phoneToken = await account.createPhoneToken(
-          'unique()',
-          phone
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString()
+        const expiresAt = Date.now() + 5 * 60 * 1000
+        
+        // Store OTP in database
+        await databases.createDocument(
+          DATABASE_ID,
+          OTP_COLLECTION_ID,
+          ID.unique(),
+          {
+            identifier: phone,
+            otp,
+            expiresAt,
+            method: 'sms'
+          }
         )
-
-        // Store the userId for verification
-        otpStore.set(phone, { 
-          otp: phoneToken.userId, 
-          expiresAt: Date.now() + 5 * 60 * 1000, 
-          method: 'sms',
-          userId: phoneToken.userId 
-        })
-
+        
+        // Send OTP via Arkesel
+        await sendSMSOTP(phone, otp)
+        
         return NextResponse.json({ 
           success: true, 
-          message: 'OTP sent successfully via Appwrite SMS',
-          method: 'sms',
-          userId: phoneToken.userId
+          message: 'OTP sent successfully via Arkesel SMS',
+          method: 'sms'
         })
-      } catch (appwriteError: any) {
-        console.error('Appwrite error:', appwriteError)
-        
-        // Handle SMS limit exceeded error
-        if (appwriteError.code === 402 && appwriteError.type === 'limit_auth_phone_exceeded') {
-          return NextResponse.json({ 
-            error: 'SMS authentication limit exceeded. Please upgrade your Appwrite plan or use email authentication instead.',
-            code: 'SMS_LIMIT_EXCEEDED',
-            suggestion: 'Try using email OTP or upgrade your Appwrite plan'
-          }, { status: 429 })
-        }
-        
-        return NextResponse.json({ error: 'Failed to send OTP via Appwrite' }, { status: 500 })
+      } catch (arkeselError) {
+        console.error('Arkesel error:', arkeselError)
+        return NextResponse.json({ error: 'Failed to send OTP via Arkesel' }, { status: 500 })
       }
     }
 
     // Email Method - Use Arkesel
     if (method === 'email') {
+      // Generate OTP once at the start
+      const otp = Math.floor(100000 + Math.random() * 900000).toString()
+      const expiresAt = Date.now() + 5 * 60 * 1000
+      
+      // Store OTP in database
+      await databases.createDocument(
+        DATABASE_ID,
+        OTP_COLLECTION_ID,
+        ID.unique(),
+        {
+          identifier: email,
+          otp,
+          expiresAt,
+          method: 'email'
+        }
+      )
+      
       // Try Arkesel first
       if (process.env.ARKESEL_API_KEY) {
         try {
-          // Generate OTP
-          const otp = Math.floor(100000 + Math.random() * 900000).toString()
-          const expiresAt = Date.now() + 5 * 60 * 1000
-          
-          // Store OTP for verification
-          otpStore.set(email, { otp, expiresAt, method: 'email' })
-          
           // Send OTP via Arkesel
           await sendEmailOTP(email, otp)
           
@@ -121,10 +104,6 @@ export async function POST(request: NextRequest) {
       }
       
       // Fallback to Resend
-      // Generate OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString()
-      const expiresAt = Date.now() + 5 * 60 * 1000
-      otpStore.set(email, { otp, expiresAt, method: 'email' })
 
       // Try Resend if configured
       if (resend) {

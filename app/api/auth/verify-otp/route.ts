@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { account, databases, DATABASE_ID, COLLECTIONS, ID } from '@/lib/appwrite'
 
-// Shared in-memory OTP storage (must match send-otp storage)
-// Using global to share between route instances
-declare global {
-  var otpStore: Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email'; userId?: string }>
-}
+// OTP collection ID - must match send-otp route
+const OTP_COLLECTION_ID = 'otps'
 
-if (!global.otpStore) {
-  global.otpStore = new Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email'; userId?: string }>()
+interface OTPDocument {
+  identifier: string // phone or email
+  otp: string
+  expiresAt: number
+  method: 'sms' | 'email'
+  userId?: string
 }
-
-const otpStore = global.otpStore
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,15 +32,24 @@ export async function POST(request: NextRequest) {
 
     // SMS Method - Handle both Arkesel and Appwrite Phone Auth
     if (method === 'sms') {
-      const storedData = otpStore.get(phone)
+      // Query database for OTP
+      const otpDocuments = await databases.listDocuments(
+        DATABASE_ID,
+        OTP_COLLECTION_ID,
+        [`identifier="${phone}"`, `method="sms"`]
+      )
       
-      if (!storedData) {
+      if (otpDocuments.documents.length === 0) {
         return NextResponse.json({ error: 'OTP not found or expired' }, { status: 400 })
       }
-
+      
+      // Get the most recent OTP
+      const storedData = otpDocuments.documents[0] as any
+      
       // Check if OTP is expired
       if (Date.now() > storedData.expiresAt) {
-        otpStore.delete(phone)
+        // Delete expired OTP
+        await databases.deleteDocument(DATABASE_ID, OTP_COLLECTION_ID, storedData.$id)
         return NextResponse.json({ error: 'OTP has expired' }, { status: 400 })
       }
 
@@ -55,7 +63,7 @@ export async function POST(request: NextRequest) {
           )
 
           // Clear OTP after successful verification
-          otpStore.delete(phone)
+          await databases.deleteDocument(DATABASE_ID, OTP_COLLECTION_ID, storedData.$id)
 
           // Create or update user in database
           try {
@@ -97,9 +105,9 @@ export async function POST(request: NextRequest) {
           } catch (dbError) {
             console.error('Database error:', dbError)
             return NextResponse.json({ 
-              success: true, 
-              message: 'OTP verified successfully via Appwrite SMS (database error)' 
-            })
+              error: 'Failed to update user database after OTP verification',
+              success: false
+            }, { status: 500 })
           }
         } catch (appwriteError) {
           console.error('Appwrite error:', appwriteError)
@@ -112,7 +120,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Clear OTP after successful verification
-        otpStore.delete(phone)
+        await databases.deleteDocument(DATABASE_ID, OTP_COLLECTION_ID, storedData.$id)
 
         // Create or update user in database
         try {
@@ -154,24 +162,33 @@ export async function POST(request: NextRequest) {
         } catch (dbError) {
           console.error('Database error:', dbError)
           return NextResponse.json({ 
-            success: true, 
-            message: 'OTP verified successfully via SMS (database error)' 
-          })
+            error: 'Failed to update user database after OTP verification',
+            success: false
+          }, { status: 500 })
         }
       }
     }
 
-    // Email Method - Verify OTP locally
+    // Email Method - Verify OTP from database
     if (method === 'email') {
-      const storedData = otpStore.get(email)
-
-      if (!storedData) {
+      // Query database for OTP
+      const otpDocuments = await databases.listDocuments(
+        DATABASE_ID,
+        OTP_COLLECTION_ID,
+        [`identifier="${email}"`, `method="email"`]
+      )
+      
+      if (otpDocuments.documents.length === 0) {
         return NextResponse.json({ error: 'OTP not found or expired' }, { status: 400 })
       }
-
+      
+      // Get the most recent OTP
+      const storedData = otpDocuments.documents[0] as any
+      
       // Check if OTP is expired
       if (Date.now() > storedData.expiresAt) {
-        otpStore.delete(email)
+        // Delete expired OTP
+        await databases.deleteDocument(DATABASE_ID, OTP_COLLECTION_ID, storedData.$id)
         return NextResponse.json({ error: 'OTP has expired' }, { status: 400 })
       }
 
@@ -181,7 +198,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Clear OTP after successful verification
-      otpStore.delete(email)
+      await databases.deleteDocument(DATABASE_ID, OTP_COLLECTION_ID, storedData.$id)
 
       // Create or update user in database
       try {
@@ -221,9 +238,9 @@ export async function POST(request: NextRequest) {
       } catch (dbError) {
         console.error('Database error:', dbError)
         return NextResponse.json({ 
-          success: true, 
-          message: 'OTP verified successfully via email (database error)' 
-        })
+          error: 'Failed to update user database after OTP verification',
+          success: false
+        }, { status: 500 })
       }
     }
 
