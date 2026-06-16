@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendSMSOTP, sendEmailOTP } from '@/lib/arkesel'
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 // In-memory OTP storage (WARNING: This won't work in serverless environments like Vercel)
 // Using global to share between route instances in development
 // For production, consider using Redis or a database
