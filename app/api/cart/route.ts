@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { databases, DATABASE_ID, COLLECTIONS, ID } from '@/lib/appwrite'
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
+// In-memory cart storage (WARNING: This won't work in serverless environments like Vercel)
+// For production, consider using Redis or a database
+declare global {
+  var cartStore: Map<string, any[]>
+}
+
+if (!global.cartStore) {
+  global.cartStore = new Map<string, any[]>()
+}
+
+const cartStore = global.cartStore
 
 // GET cart items for a user
 export async function GET(request: NextRequest) {
@@ -11,16 +25,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTIONS.CART,
-      [`userId="${userId}"`]
-    )
+    const cartItems = cartStore.get(userId) || []
 
     return NextResponse.json({ 
       success: true, 
-      cartItems: response.documents,
-      total: response.total
+      cartItems,
+      total: cartItems.length
     })
   } catch (error) {
     console.error('Error fetching cart:', error)
@@ -38,43 +48,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID, Product ID, and quantity are required' }, { status: 400 })
     }
 
+    // Get existing cart items
+    const cartItems = cartStore.get(userId) || []
+    
     // Check if product already in cart
-    const existing = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTIONS.CART,
-      [`userId="${userId}"`, `productId="${productId}"`]
-    )
-
-    if (existing.total > 0) {
-      // Update quantity instead
-      const updated = await databases.updateDocument(
-        DATABASE_ID,
-        COLLECTIONS.CART,
-        existing.documents[0].$id,
-        {
-          quantity: existing.documents[0].quantity + quantity
-        }
-      )
-      return NextResponse.json({ 
-        success: true, 
-        cartItem: updated 
-      })
-    }
-
-    const cartItem = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTIONS.CART,
-      ID.unique(),
-      {
+    const existingIndex = cartItems.findIndex((item: any) => item.productId === productId)
+    
+    if (existingIndex >= 0) {
+      // Update quantity
+      cartItems[existingIndex].quantity += quantity
+    } else {
+      // Add new item
+      cartItems.push({
+        $id: `cart-${Date.now()}`,
         userId,
         productId,
         quantity
-      }
-    )
+      })
+    }
+    
+    cartStore.set(userId, cartItems)
 
     return NextResponse.json({ 
       success: true, 
-      cartItem 
+      cartItem: existingIndex >= 0 ? cartItems[existingIndex] : cartItems[cartItems.length - 1]
     })
   } catch (error) {
     console.error('Error adding to cart:', error)

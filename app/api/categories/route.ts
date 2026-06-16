@@ -1,18 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { databases, DATABASE_ID, COLLECTIONS, ID } from '@/lib/appwrite'
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
+// In-memory categories storage (WARNING: This won't work in serverless environments like Vercel)
+// For production, consider using Redis or a database
+declare global {
+  var categoriesStore: any[]
+}
+
+if (!global.categoriesStore) {
+  global.categoriesStore = [
+    { $id: 'cat-1', name: 'Electronics', description: 'Electronic devices and accessories', image: '' },
+    { $id: 'cat-2', name: 'Clothing', description: 'Fashion and apparel', image: '' },
+    { $id: 'cat-3', name: 'Home & Garden', description: 'Home improvement and garden supplies', image: '' }
+  ]
+}
+
+const categoriesStore = global.categoriesStore
 
 // GET all categories
 export async function GET() {
   try {
-    const response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTIONS.CATEGORIES
-    )
-
     return NextResponse.json({ 
       success: true, 
-      categories: response.documents,
-      total: response.total
+      categories: categoriesStore,
+      total: categoriesStore.length
     })
   } catch (error) {
     console.error('Error fetching categories:', error)
@@ -30,16 +43,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
-    const category = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTIONS.CATEGORIES,
-      ID.unique(),
-      {
-        name,
-        description: description || '',
-        image: image || ''
-      }
-    )
+    const category = {
+      $id: `cat-${Date.now()}`,
+      name,
+      description: description || '',
+      image: image || ''
+    }
+    
+    categoriesStore.push(category)
 
     return NextResponse.json({ 
       success: true, 
