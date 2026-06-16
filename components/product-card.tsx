@@ -69,7 +69,7 @@ export default function ProductCard({
         <h3 className="font-medium text-gray-800 line-clamp-1">{product.name}</h3>
         <p className="text-sm text-gray-500 mb-2">{product.category}</p>
         <div className="flex items-center justify-between">
-          <span className="font-bold">${product.price.toFixed(2)}</span>
+          <span className="font-bold">GHS {product.price.toFixed(2)}</span>
           <button
             className="p-1.5 bg-rose-100 rounded-full text-rose-500 hover:bg-rose-200 transition-colors"
             onClick={() => addToCart(product)}

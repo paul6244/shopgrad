@@ -74,7 +74,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <div>
                           <div className="flex justify-between text-base font-medium text-gray-900">
                             <h3 className="line-clamp-1">{item.name}</h3>
-                            <p className="ml-4">${(item.price * item.quantity).toFixed(2)}</p>
+                            <p className="ml-4">GHS {(item.price * item.quantity).toFixed(2)}</p>
                           </div>
                           <p className="mt-1 text-sm text-gray-500">{item.category}</p>
                         </div>
@@ -114,7 +114,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
                 <div className="flex justify-between text-base font-medium text-gray-900 mb-4">
                   <p>Subtotal</p>
-                  <p>${cartTotal.toFixed(2)}</p>
+                  <p>GHS {cartTotal.toFixed(2)}</p>
                 </div>
                 <Link
                   href="/checkout"

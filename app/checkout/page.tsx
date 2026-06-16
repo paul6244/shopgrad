@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, CreditCard, Truck, Check } from "lucide-react"
@@ -20,48 +20,99 @@ export default function CheckoutPage() {
     city: "",
     state: "",
     zipCode: "",
-    country: "United States",
+    country: "Ghana",
     phone: "",
-  })
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: "",
-    cardName: "",
-    expiry: "",
-    cvv: "",
   })
   const [isProcessing, setIsProcessing] = useState(false)
   const [orderId, setOrderId] = useState("")
+  const [mounted, setMounted] = useState(false)
 
   const { cartItems, cartTotal, clearCart } = useCart()
   const { user } = useAuth()
   const router = useRouter()
 
+  useEffect(() => {
+    setMounted(true)
+    // Pre-fill phone number if user has one
+    if (user?.phone) {
+      setShippingInfo(prev => ({ ...prev, phone: user.phone || '' }))
+    }
+  }, [user])
+
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setCurrentStep("payment")
-    window.scrollTo(0, 0)
   }
 
-  const handlePaymentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handlePaymentSubmit = async () => {
     setIsProcessing(true)
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      const reference = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+      const email = user?.email || shippingInfo.fullName.replace(/\s+/g, '').toLowerCase() + '@user.com'
+
+      console.log('Payment submission:', {
+        email,
+        amount: totalAmount,
+        reference,
+        user: user ? 'logged in' : 'guest',
+        cartItems: cartItems.length
+      })
+
+      const response = await fetch('/api/paystack/initialize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          amount: totalAmount,
+          reference,
+          callbackUrl: `${window.location.origin}/checkout/verify?reference=${reference}`,
+          metadata: {
+            orderId: reference,
+            items: cartItems.length,
+            total: totalAmount,
+            shippingInfo
+          }
+        })
+      })
+
+      const data = await response.json()
+
+      console.log('Payment initialization response:', data)
+
+      if (response.ok && data.status && data.data?.authorization_url) {
+        // Redirect to Paystack payment page
+        window.location.href = data.data.authorization_url
+      } else {
+        throw new Error(data.error || 'Failed to initialize payment - no authorization URL returned')
+      }
+    } catch (error) {
+      console.error('Payment error:', error)
       setIsProcessing(false)
-      setOrderId(`ORD-${Math.floor(100000 + Math.random() * 900000)}`)
-      setCurrentStep("confirmation")
-      clearCart()
-      window.scrollTo(0, 0)
-    }, 2000)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.'
+      alert(errorMessage)
+    }
   }
 
-  const shippingCost = 5.99
-  const tax = cartTotal * 0.08
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [currentStep])
+
+  // Redirect if cart is empty (only on client)
+  useEffect(() => {
+    if (mounted && cartItems.length === 0 && currentStep !== "confirmation") {
+      router.push("/")
+    }
+  }, [mounted, cartItems.length, currentStep, router])
+
+  const shippingCost = 30
+  const tax = cartTotal * 0.12
   const totalAmount = cartTotal + shippingCost + tax
 
-  if (cartItems.length === 0 && currentStep !== "confirmation") {
-    router.push("/")
+  if (!mounted || (cartItems.length === 0 && currentStep !== "confirmation")) {
     return null
   }
 
@@ -166,7 +217,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                      State
+                      Region
                     </label>
                     <input
                       type="text"
@@ -182,7 +233,7 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">
-                      ZIP Code
+                      Postal Code
                     </label>
                     <input
                       type="text"
@@ -204,10 +255,11 @@ export default function CheckoutPage() {
                       onChange={(e) => setShippingInfo({ ...shippingInfo, country: e.target.value })}
                       required
                     >
+                      <option value="Ghana">Ghana</option>
+                      <option value="Nigeria">Nigeria</option>
+                      <option value="Kenya">Kenya</option>
                       <option value="United States">United States</option>
-                      <option value="Canada">Canada</option>
                       <option value="United Kingdom">United Kingdom</option>
-                      <option value="Australia">Australia</option>
                     </select>
                   </div>
                 </div>
@@ -244,82 +296,27 @@ export default function CheckoutPage() {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-6">
               <h1 className="text-2xl font-bold mb-6">Payment Information</h1>
-              <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                    Card Number
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      id="cardNumber"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-300"
-                      placeholder="1234 5678 9012 3456"
-                      value={paymentInfo.cardNumber}
-                      onChange={(e) => setPaymentInfo({ ...paymentInfo, cardNumber: e.target.value })}
-                      required
-                    />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <CreditCard className="h-5 w-5 text-gray-400" />
-                    </div>
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center mb-3">
+                    <CreditCard className="h-5 w-5 text-rose-500 mr-2" />
+                    <span className="font-medium">Pay with Paystack</span>
                   </div>
-                </div>
-
-                <div>
-                  <label htmlFor="cardName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Name on Card
-                  </label>
-                  <input
-                    type="text"
-                    id="cardName"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-300"
-                    value={paymentInfo.cardName}
-                    onChange={(e) => setPaymentInfo({ ...paymentInfo, cardName: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="expiry" className="block text-sm font-medium text-gray-700 mb-1">
-                      Expiry Date
-                    </label>
-                    <input
-                      type="text"
-                      id="expiry"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-300"
-                      placeholder="MM/YY"
-                      value={paymentInfo.expiry}
-                      onChange={(e) => setPaymentInfo({ ...paymentInfo, expiry: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
-                      CVV
-                    </label>
-                    <input
-                      type="text"
-                      id="cvv"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-300"
-                      placeholder="123"
-                      value={paymentInfo.cvv}
-                      onChange={(e) => setPaymentInfo({ ...paymentInfo, cvv: e.target.value })}
-                      required
-                    />
-                  </div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Secure payment powered by Paystack. You will be redirected to complete your payment.
+                  </p>
                 </div>
 
                 <div className="pt-4">
                   <button
-                    type="submit"
+                    onClick={handlePaymentSubmit}
                     disabled={isProcessing}
                     className="w-full py-3 bg-gradient-to-r from-rose-400 to-purple-500 text-white rounded-lg font-medium hover:from-rose-500 hover:to-purple-600 transition-colors disabled:opacity-70"
                   >
-                    {isProcessing ? "Processing..." : `Pay $${totalAmount.toFixed(2)}`}
+                    {isProcessing ? "Processing..." : `Pay GHS ${totalAmount.toFixed(2)}`}
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         )}
@@ -378,7 +375,7 @@ export default function CheckoutPage() {
                       <h3 className="text-sm font-medium">{item.name}</h3>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <div className="text-sm font-medium">${(item.price * item.quantity).toFixed(2)}</div>
+                    <div className="text-sm font-medium">GHS {(item.price * item.quantity).toFixed(2)}</div>
                   </div>
                 ))}
               </div>
@@ -386,19 +383,19 @@ export default function CheckoutPage() {
               <div className="mt-6 border-t pt-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span>Subtotal</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>GHS {cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm mb-2">
                   <span>Shipping</span>
-                  <span>${shippingCost.toFixed(2)}</span>
+                  <span>GHS {shippingCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm mb-4">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>GHS {tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold">
                   <span>Total</span>
-                  <span>${totalAmount.toFixed(2)}</span>
+                  <span>GHS {totalAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>

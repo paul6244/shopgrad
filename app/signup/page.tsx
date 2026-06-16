@@ -3,16 +3,19 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Mail, Lock, ArrowLeft } from "lucide-react"
+import { Mail, Lock, ArrowLeft, User, Phone } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 
 export default function SignUpPage() {
+  const [fullName, setFullName] = useState("")
+  const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { signup } = useAuth()
 
@@ -20,31 +23,50 @@ export default function SignUpPage() {
     e.preventDefault()
     setError("")
 
+    // Validate full name
+    if (!fullName || fullName.trim().length < 2) {
+      setError("Please enter your full name")
+      return
+    }
+
+    // Validate Ghana phone number format (+233XXXXXXXXX)
+    const phoneRegex = /^\+233\d{9}$/
+    if (!phone || !phoneRegex.test(phone)) {
+      setError("Please enter a valid Ghana phone number (+233XXXXXXXXX)")
+      return
+    }
+
+    // Validate email
+    if (!email || !email.includes("@")) {
+      setError("Please enter a valid email address")
+      return
+    }
+
+    // Validate password minimum length
+    if (!password || password.length < 8) {
+      setError("Password must be at least 8 characters")
+      return
+    }
+
+    // Validate password confirmation
     if (password !== confirmPassword) {
       setError("Passwords do not match")
       return
     }
 
+    setLoading(true)
     try {
-      await signup(email, password)
+      await signup(email, password, fullName)
       router.push("/")
     } catch (err) {
       setError("Failed to create an account. Please try again.")
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500">
-      {/* Status Bar */}
-      <div className="flex justify-between items-center px-6 py-3 text-black">
-        <div>9:41</div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3">•••</div>
-          <div className="h-3 w-3">📶</div>
-          <div className="h-3 w-3">🔋</div>
-        </div>
-      </div>
-
       <div className="px-6 py-4">
         <Link href="/" className="inline-flex items-center text-black">
           <ArrowLeft className="h-5 w-5 mr-1" />
@@ -53,67 +75,101 @@ export default function SignUpPage() {
       </div>
 
       <main className="flex-1 flex flex-col px-6 pt-10">
-        <h1 className="text-4xl font-bold text-black mb-12">Sign up</h1>
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md mx-auto w-full">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Sign up</h1>
 
-        {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-6">{error}</div>}
+          {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-6">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <Mail className="h-5 w-5 text-black" />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Full Name"
+                className="w-full py-3 pl-12 pr-4 bg-gray-50 text-gray-700 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
             </div>
-            <input
-              type="email"
-              placeholder="Enter email"
-              className="w-full py-4 pl-12 pr-4 bg-[#f2f2f7] text-gray-700 rounded-full focus:outline-none"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
 
-          <div className="relative">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-black" />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Phone className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="tel"
+                placeholder="Phone Number (+233XXXXXXXXX)"
+                className="w-full py-3 pl-12 pr-4 bg-gray-50 text-gray-700 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
             </div>
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full py-4 pl-12 pr-4 bg-[#f2f2f7] text-gray-700 rounded-full focus:outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
 
-          <div className="relative">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-black" />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Mail className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="email"
+                placeholder="Email"
+                className="w-full py-3 pl-12 pr-4 bg-gray-50 text-gray-700 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              className="w-full py-4 pl-12 pr-4 bg-[#f2f2f7] text-gray-700 rounded-full focus:outline-none"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
 
-          <div className="flex justify-center mt-12">
-            <button type="submit" className="bg-[#f2f2f7] text-black font-bold py-4 px-8 rounded-full min-w-[160px]">
-              Sign Up
+            <div className="relative">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Lock className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="password"
+                placeholder="Password (min 8 characters)"
+                className="w-full py-3 pl-12 pr-4 bg-gray-50 text-gray-700 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+              />
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Lock className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                className="w-full py-3 pl-12 pr-4 bg-gray-50 text-gray-700 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-rose-400 to-purple-500 text-white font-bold py-3 px-8 rounded-full hover:from-rose-500 hover:to-purple-600 transition-all shadow-lg"
+              disabled={loading}
+            >
+              {loading ? "Creating Account..." : "Sign Up"}
             </button>
-          </div>
-        </form>
+          </form>
 
-        <div className="mt-8 text-center">
-          <p className="text-black">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium underline">
-              Sign In
-            </Link>
-          </p>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <Link href="/login" className="font-medium text-rose-500 hover:text-rose-600">
+                Sign In
+              </Link>
+            </p>
+          </div>
         </div>
       </main>
 

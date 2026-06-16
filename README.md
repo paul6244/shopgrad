@@ -1,30 +1,36 @@
-# Recreate Figma UI
+# ShopGrad - Shopping App
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/paul6244s-projects/v0-recreate-figma-ui-10)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/sEDfZp5YNfo)
+A beautiful shopping application with gradient design built with Next.js.
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+This is a modern e-commerce shopping application featuring:
+- Product browsing and categorization
+- Shopping cart functionality
+- User authentication
+- Favorites management
+- Checkout process
 
-## Deployment
+## Getting Started
 
-Your project is live at:
+Install dependencies:
 
-**[https://vercel.com/paul6244s-projects/v0-recreate-figma-ui-10](https://vercel.com/paul6244s-projects/v0-recreate-figma-ui-10)**
+```bash
+pnpm install
+```
 
-## Build your app
+Run the development server:
 
-Continue building your app on:
+```bash
+pnpm dev
+```
 
-**[https://v0.dev/chat/projects/sEDfZp5YNfo](https://v0.dev/chat/projects/sEDfZp5YNfo)**
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## How It Works
+## Build
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+Build the application for production:
+
+```bash
+pnpm build
+```

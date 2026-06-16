@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test OTP with Appwrite</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .method-selector { margin: 20px 0; }
+        .sms-section, .email-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .hidden { display: none; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 100%; box-sizing: border-box; }
+        .error { color: red; background: #fee; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { color: green; background: #efe; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Test OTP with Appwrite</h1>
+    
+    <div class="method-selector">
+        <label><input type="radio" name="method" value="sms" checked onchange="toggleMethod()"> SMS OTP</label>
+        <label><input type="radio" name="method" value="email" onchange="toggleMethod()"> Email OTP</label>
+    </div>
+
+    <div id="sms-section" class="sms-section">
+        <h3>SMS OTP</h3>
+        <div>
+            <label>Phone Number:</label>
+            <input type="text" id="phone" value="+2330596244927" placeholder="+1234567890">
+        </div>
+        <br>
+        <button onclick="sendSMSOTP()">Send SMS OTP</button>
+    </div>
+
+    <div id="email-section" class="email-section hidden">
+        <h3>Email OTP</h3>
+        <div>
+            <label>Email Address:</label>
+            <input type="email" id="email" placeholder="user@example.com">
+        </div>
+        <br>
+        <button onclick="sendEmailOTP()">Send Email OTP</button>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <label>OTP Code:</label>
+        <input type="text" id="otp" placeholder="123456">
+    </div>
+    <br>
+    <button onclick="verifyOTP()">Verify OTP</button>
+    <br><br>
+    <div id="result"></div>
+
+    <script>
+        function toggleMethod() {
+            const method = document.querySelector('input[name="method"]:checked').value;
+            document.getElementById('sms-section').classList.toggle('hidden', method !== 'sms');
+            document.getElementById('email-section').classList.toggle('hidden', method !== 'email');
+        }
+
+        async function sendSMSOTP() {
+            const phone = document.getElementById('phone').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        method: 'sms'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 'SMS_LIMIT_EXCEEDED') {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>SMS Limit Exceeded</strong><br>
+                            ${data.error}<br>
+                            <em>${data.suggestion}</em>
+                        </div>
+                        <p>Try using Email OTP instead (select Email OTP above).</p>
+                    `;
+                } else if (data.success) {
+                    resultDiv.innerHTML = `<div class="success">${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function sendEmailOTP() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        method: 'email'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="success">${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function verifyOTP() {
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const otp = document.getElementById('otp').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone: method === 'sms' ? phone : undefined,
+                        email: method === 'email' ? email : undefined,
+                        otp: otp,
+                        method: method
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="success">${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

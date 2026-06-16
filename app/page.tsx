@@ -15,42 +15,42 @@ const products = [
   {
     id: 1,
     name: "Wireless Headphones",
-    price: 129.99,
+    price: 650,
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop&q=80",
     category: "Electronics",
   },
   {
     id: 2,
     name: "Smart Watch",
-    price: 199.99,
+    price: 850,
     image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&h=500&fit=crop&q=80",
     category: "Electronics",
   },
   {
     id: 3,
     name: "Running Shoes",
-    price: 89.99,
+    price: 450,
     image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=80",
     category: "Fashion",
   },
   {
     id: 4,
     name: "Yoga Mat",
-    price: 29.99,
+    price: 150,
     image: "https://images.unsplash.com/photo-1592432678016-e910b452f9a2?w=500&h=500&fit=crop&q=80",
     category: "Fitness",
   },
   {
     id: 5,
     name: "Coffee Maker",
-    price: 79.99,
+    price: 400,
     image: "https://images.unsplash.com/photo-1570486916434-a2bbfc74de4d?w=500&h=500&fit=crop&q=80",
     category: "Home",
   },
   {
     id: 6,
     name: "Backpack",
-    price: 49.99,
+    price: 250,
     image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop&q=80",
     category: "Fashion",
   },
@@ -58,70 +58,70 @@ const products = [
   {
     id: 7,
     name: "Smartphone",
-    price: 699.99,
+    price: 3500,
     image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&h=500&fit=crop&q=80",
     category: "Electronics",
   },
   {
     id: 8,
     name: "Bluetooth Speaker",
-    price: 59.99,
+    price: 300,
     image: "https://images.unsplash.com/photo-1589003077984-894e133dabab?w=500&h=500&fit=crop&q=80",
     category: "Electronics",
   },
   {
     id: 9,
     name: "Fitness Tracker",
-    price: 49.99,
+    price: 250,
     image: "https://images.unsplash.com/photo-1576243345690-4e4b79b63288?w=500&h=500&fit=crop&q=80",
     category: "Fitness",
   },
   {
     id: 10,
     name: "Dumbbell Set",
-    price: 119.99,
+    price: 600,
     image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=500&h=500&fit=crop&q=80",
     category: "Fitness",
   },
   {
     id: 11,
     name: "Desk Lamp",
-    price: 34.99,
+    price: 175,
     image: "https://images.unsplash.com/photo-1534189283006-b4999384a2eb?w=500&h=500&fit=crop&q=80",
     category: "Home",
   },
   {
     id: 12,
     name: "Throw Blanket",
-    price: 29.99,
+    price: 150,
     image: "https://images.unsplash.com/photo-1600369671236-e74521d4b6ad?w=500&h=500&fit=crop&q=80",
     category: "Home",
   },
   {
     id: 13,
     name: "Sunglasses",
-    price: 79.99,
+    price: 400,
     image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=500&fit=crop&q=80",
     category: "Fashion",
   },
   {
     id: 14,
     name: "Leather Wallet",
-    price: 39.99,
+    price: 200,
     image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=500&h=500&fit=crop&q=80",
     category: "Fashion",
   },
   {
     id: 15,
     name: "Wireless Earbuds",
-    price: 89.99,
+    price: 450,
     image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f37?w=500&h=500&fit=crop&q=80",
     category: "Electronics",
   },
   {
     id: 16,
     name: "Plant Pot",
-    price: 19.99,
+    price: 100,
     image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=500&h=500&fit=crop&q=80",
     category: "Home",
   },
@@ -255,7 +255,7 @@ export default function ShoppingApp() {
               className="bg-gradient-to-r from-rose-500 to-purple-600 text-white py-3 px-8 rounded-full shadow-lg font-medium flex items-center"
             >
               <ShoppingBag className="h-5 w-5 mr-2" />
-              Checkout (${cartTotal.toFixed(2)})
+              Checkout (GHS {cartTotal.toFixed(2)})
             </Link>
           </div>
         )}
