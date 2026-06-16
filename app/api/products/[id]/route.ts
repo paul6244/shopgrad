@@ -1,5 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite'
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
+// In-memory products storage (WARNING: This won't work in serverless environments like Vercel)
+// For production, consider using Redis or a database
+declare global {
+  var productsStore: any[]
+}
+
+if (!global.productsStore) {
+  global.productsStore = [
+    {
+      $id: 'prod-1',
+      name: 'Wireless Headphones',
+      description: 'High-quality wireless headphones with noise cancellation',
+      price: 99.99,
+      image: '',
+      category: 'Electronics',
+      stock: 50,
+      userId: 'user-1'
+    },
+    {
+      $id: 'prod-2',
+      name: 'Smart Watch',
+      description: 'Feature-rich smartwatch with health tracking',
+      price: 149.99,
+      image: '',
+      category: 'Electronics',
+      stock: 30,
+      userId: 'user-1'
+    },
+    {
+      $id: 'prod-3',
+      name: 'T-Shirt',
+      description: 'Comfortable cotton t-shirt',
+      price: 19.99,
+      image: '',
+      category: 'Clothing',
+      stock: 100,
+      userId: 'user-1'
+    }
+  ]
+}
+
+const productsStore = global.productsStore
 
 // GET single product
 export async function GET(
@@ -7,11 +52,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const product = await databases.getDocument(
-      DATABASE_ID,
-      COLLECTIONS.PRODUCTS,
-      params.id
-    )
+    const product = productsStore.find(p => p.$id === params.id)
+
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -32,19 +77,19 @@ export async function PUT(
     const body = await request.json()
     const { name, description, price, image, category, stock } = body
 
-    const product = await databases.updateDocument(
-      DATABASE_ID,
-      COLLECTIONS.PRODUCTS,
-      params.id,
-      {
-        ...(name && { name }),
-        ...(description && { description }),
-        ...(price && { price }),
-        ...(image !== undefined && { image }),
-        ...(category && { category }),
-        ...(stock && { stock })
-      }
-    )
+    const index = productsStore.findIndex(p => p.$id === params.id)
+    
+    if (index === -1) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+    }
+
+    const product = productsStore[index]
+    if (name) product.name = name
+    if (description) product.description = description
+    if (price) product.price = price
+    if (image !== undefined) product.image = image
+    if (category) product.category = category
+    if (stock) product.stock = stock
 
     return NextResponse.json({ 
       success: true, 
@@ -62,11 +107,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await databases.deleteDocument(
-      DATABASE_ID,
-      COLLECTIONS.PRODUCTS,
-      params.id
-    )
+    const index = productsStore.findIndex(p => p.$id === params.id)
+    
+    if (index === -1) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+    }
+
+    productsStore.splice(index, 1)
 
     return NextResponse.json({ 
       success: true, 

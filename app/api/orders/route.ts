@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { databases, DATABASE_ID, COLLECTIONS, ID } from '@/lib/appwrite'
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
+// In-memory orders storage (WARNING: This won't work in serverless environments like Vercel)
+// For production, consider using Redis or a database
+declare global {
+  var ordersStore: Map<string, any[]>
+}
+
+if (!global.ordersStore) {
+  global.ordersStore = new Map<string, any[]>()
+}
+
+const ordersStore = global.ordersStore
 
 // GET all orders (for a specific user)
 export async function GET(request: NextRequest) {
@@ -11,16 +25,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTIONS.ORDERS,
-      [`userId="${userId}"`]
-    )
+    const orders = ordersStore.get(userId) || []
 
     return NextResponse.json({ 
       success: true, 
-      orders: response.documents,
-      total: response.total
+      orders,
+      total: orders.length
     })
   } catch (error) {
     console.error('Error fetching orders:', error)
@@ -38,18 +48,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const order = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTIONS.ORDERS,
-      ID.unique(),
-      {
-        userId,
-        total,
-        status,
-        shippingAddress,
-        items: typeof items === 'string' ? items : JSON.stringify(items)
-      }
-    )
+    const order = {
+      $id: `order-${Date.now()}`,
+      userId,
+      total,
+      status,
+      shippingAddress,
+      items: typeof items === 'string' ? items : JSON.stringify(items),
+      createdAt: new Date().toISOString()
+    }
+    
+    const userOrders = ordersStore.get(userId) || []
+    userOrders.push(order)
+    ordersStore.set(userId, userOrders)
 
     return NextResponse.json({ 
       success: true, 

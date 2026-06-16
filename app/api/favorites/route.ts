@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { databases, DATABASE_ID, COLLECTIONS, ID } from '@/lib/appwrite'
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
+// In-memory favorites storage (WARNING: This won't work in serverless environments like Vercel)
+// For production, consider using Redis or a database
+declare global {
+  var favoritesStore: Map<string, any[]>
+}
+
+if (!global.favoritesStore) {
+  global.favoritesStore = new Map<string, any[]>()
+}
+
+const favoritesStore = global.favoritesStore
 
 // GET all favorites for a user
 export async function GET(request: NextRequest) {
@@ -11,16 +25,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTIONS.FAVORITES,
-      [`userId="${userId}"`]
-    )
+    const favorites = favoritesStore.get(userId) || []
 
     return NextResponse.json({ 
       success: true, 
-      favorites: response.documents,
-      total: response.total
+      favorites,
+      total: favorites.length
     })
   } catch (error) {
     console.error('Error fetching favorites:', error)
@@ -38,26 +48,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID and Product ID are required' }, { status: 400 })
     }
 
+    // Get existing favorites
+    const favorites = favoritesStore.get(userId) || []
+    
     // Check if already in favorites
-    const existing = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTIONS.FAVORITES,
-      [`userId="${userId}"`, `productId="${productId}"`]
-    )
-
-    if (existing.total > 0) {
+    if (favorites.some((item: any) => item.productId === productId)) {
       return NextResponse.json({ error: 'Product already in favorites' }, { status: 400 })
     }
 
-    const favorite = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTIONS.FAVORITES,
-      ID.unique(),
-      {
-        userId,
-        productId
-      }
-    )
+    const favorite = {
+      $id: `fav-${Date.now()}`,
+      userId,
+      productId
+    }
+    
+    favorites.push(favorite)
+    favoritesStore.set(userId, favorites)
 
     return NextResponse.json({ 
       success: true, 
