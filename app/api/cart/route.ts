@@ -1,19 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
-
-// In-memory cart storage (WARNING: This won't work in serverless environments like Vercel)
-// For production, consider using Redis or a database
-declare global {
-  var cartStore: Map<string, any[]>
-}
-
-if (!global.cartStore) {
-  global.cartStore = new Map<string, any[]>()
-}
-
-const cartStore = global.cartStore
 
 // GET cart items for a user
 export async function GET(request: NextRequest) {
@@ -25,12 +14,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const cartItems = cartStore.get(userId) || []
+    const result = await query(
+      'SELECT * FROM cart WHERE user_id = $1',
+      [userId]
+    )
 
     return NextResponse.json({ 
       success: true, 
-      cartItems,
-      total: cartItems.length
+      cartItems: result.rows,
+      total: result.rowCount
     })
   } catch (error) {
     console.error('Error fetching cart:', error)
@@ -48,30 +40,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID, Product ID, and quantity are required' }, { status: 400 })
     }
 
-    // Get existing cart items
-    const cartItems = cartStore.get(userId) || []
-    
     // Check if product already in cart
-    const existingIndex = cartItems.findIndex((item: any) => item.productId === productId)
-    
-    if (existingIndex >= 0) {
+    const existing = await query(
+      'SELECT * FROM cart WHERE user_id = $1 AND product_id = $2',
+      [userId, productId]
+    )
+
+    if (existing.rowCount && existing.rowCount > 0) {
       // Update quantity
-      cartItems[existingIndex].quantity += quantity
-    } else {
-      // Add new item
-      cartItems.push({
-        $id: `cart-${Date.now()}`,
-        userId,
-        productId,
-        quantity
+      const updated = await query(
+        'UPDATE cart SET quantity = quantity + $1 WHERE user_id = $2 AND product_id = $3 RETURNING *',
+        [quantity, userId, productId]
+      )
+      return NextResponse.json({ 
+        success: true, 
+        cartItem: updated.rows[0] 
       })
     }
-    
-    cartStore.set(userId, cartItems)
+
+    // Add new item
+    const cartItem = await query(
+      'INSERT INTO cart (id, user_id, product_id, quantity) VALUES ($1, $2, $3, $4) RETURNING *',
+      [`cart-${Date.now()}`, userId, productId, quantity]
+    )
 
     return NextResponse.json({ 
       success: true, 
-      cartItem: existingIndex >= 0 ? cartItems[existingIndex] : cartItems[cartItems.length - 1]
+      cartItem: cartItem.rows[0]
     })
   } catch (error) {
     console.error('Error adding to cart:', error)

@@ -1,19 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
-
-// In-memory orders storage (WARNING: This won't work in serverless environments like Vercel)
-// For production, consider using Redis or a database
-declare global {
-  var ordersStore: Map<string, any[]>
-}
-
-if (!global.ordersStore) {
-  global.ordersStore = new Map<string, any[]>()
-}
-
-const ordersStore = global.ordersStore
 
 // GET all orders (for a specific user)
 export async function GET(request: NextRequest) {
@@ -25,12 +14,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const orders = ordersStore.get(userId) || []
+    const result = await query(
+      'SELECT * FROM orders WHERE user_id = $1',
+      [userId]
+    )
 
     return NextResponse.json({ 
       success: true, 
-      orders,
-      total: orders.length
+      orders: result.rows,
+      total: result.rowCount
     })
   } catch (error) {
     console.error('Error fetching orders:', error)
@@ -48,23 +40,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const order = {
-      $id: `order-${Date.now()}`,
-      userId,
-      total,
-      status,
-      shippingAddress,
-      items: typeof items === 'string' ? items : JSON.stringify(items),
-      createdAt: new Date().toISOString()
-    }
-    
-    const userOrders = ordersStore.get(userId) || []
-    userOrders.push(order)
-    ordersStore.set(userId, userOrders)
+    const order = await query(
+      'INSERT INTO orders (id, user_id, total, status, shipping_address, items) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [`order-${Date.now()}`, userId, total, status, JSON.stringify(shippingAddress), typeof items === 'string' ? items : JSON.stringify(items)]
+    )
 
     return NextResponse.json({ 
       success: true, 
-      order 
+      order: order.rows[0]
     })
   } catch (error) {
     console.error('Error creating order:', error)

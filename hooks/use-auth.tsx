@@ -90,31 +90,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signup = async (email: string, password: string, fullName?: string) => {
-    // In a real app, this would make an API call to register
-    // For demo purposes, we'll simulate a successful registration
-    return new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        // Simple validation
-        if (email && isValidPassword(password)) {
-          const user = {
-            id: "user-" + Math.floor(Math.random() * 1000),
-            name: fullName || email.split("@")[0],
-            email,
-          }
-          setUser(user)
-          if (typeof window !== 'undefined') {
-            try {
-              localStorage.setItem("user", JSON.stringify(user))
-            } catch (error) {
-              console.error('Failed to save user to localStorage:', error)
-            }
-          }
-          resolve()
-        } else {
-          reject(new Error("Invalid credentials"))
-        }
-      }, 1000)
+    // Call the registration API
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name: fullName })
     })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || 'Failed to register')
+    }
+
+    const data = await response.json()
+    const user = data.user
+
+    setUser(user)
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem("user", JSON.stringify(user))
+      } catch (error) {
+        console.error('Failed to save user to localStorage:', error)
+      }
+    }
   }
 
   const signupWithPhone = async (phone: string, otp?: string, method: 'sms' | 'email' = 'sms', email?: string, fullName?: string) => {

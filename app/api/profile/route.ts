@@ -1,19 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
-
-// In-memory user profiles storage (WARNING: This won't work in serverless environments like Vercel)
-// For production, consider using Redis or a database
-declare global {
-  var usersStore: Map<string, any>
-}
-
-if (!global.usersStore) {
-  global.usersStore = new Map<string, any>()
-}
-
-const usersStore = global.usersStore
 
 // GET user profile
 export async function GET(request: NextRequest) {
@@ -25,15 +14,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const profile = usersStore.get(userId)
+    const result = await query(
+      'SELECT * FROM users WHERE id = $1',
+      [userId]
+    )
 
-    if (!profile) {
+    if (!result.rowCount || result.rowCount === 0) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     return NextResponse.json({ 
       success: true, 
-      profile 
+      profile: result.rows[0]
     })
   } catch (error) {
     console.error('Error fetching profile:', error)
@@ -51,25 +43,57 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const profile = usersStore.get(userId)
-    
-    if (!profile) {
+    const updates: string[] = []
+    const values: any[] = []
+    let paramIndex = 1
+
+    if (name) {
+      updates.push(`name = $${paramIndex++}`)
+      values.push(name)
+    }
+    if (email) {
+      updates.push(`email = $${paramIndex++}`)
+      values.push(email)
+    }
+    if (phone !== undefined) {
+      updates.push(`phone = $${paramIndex++}`)
+      values.push(phone)
+    }
+    if (avatar !== undefined) {
+      updates.push(`avatar = $${paramIndex++}`)
+      values.push(avatar)
+    }
+    if (address !== undefined) {
+      updates.push(`address = $${paramIndex++}`)
+      values.push(address)
+    }
+    if (city !== undefined) {
+      updates.push(`city = $${paramIndex++}`)
+      values.push(city)
+    }
+    if (country !== undefined) {
+      updates.push(`country = $${paramIndex++}`)
+      values.push(country)
+    }
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+    }
+
+    values.push(userId)
+
+    const result = await query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values
+    )
+
+    if (!result.rowCount || result.rowCount === 0) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    if (name) profile.name = name
-    if (email) profile.email = email
-    if (phone !== undefined) profile.phone = phone
-    if (avatar !== undefined) profile.avatar = avatar
-    if (address !== undefined) profile.address = address
-    if (city !== undefined) profile.city = city
-    if (country !== undefined) profile.country = country
-
-    usersStore.set(userId, profile)
-
     return NextResponse.json({ 
       success: true, 
-      profile 
+      profile: result.rows[0]
     })
   } catch (error) {
     console.error('Error updating profile:', error)

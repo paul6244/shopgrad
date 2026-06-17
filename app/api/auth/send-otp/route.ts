@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
 import { sendSMSOTP, sendEmailOTP } from '@/lib/arkesel'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
-
-// In-memory OTP storage (WARNING: This won't work in serverless environments like Vercel)
-// Using global to share between route instances in development
-// For production, consider using Redis or a database
-declare global {
-  var otpStore: Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email' }>
-}
-
-if (!global.otpStore) {
-  global.otpStore = new Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email' }>()
-}
-
-const otpStore = global.otpStore
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,9 +36,17 @@ export async function POST(request: NextRequest) {
         
         console.log('Generated OTP for SMS:', { phone, otp, expiresAt })
         
-        // Store OTP in memory
-        otpStore.set(phone, { otp, expiresAt, method: 'sms' })
-        console.log('OTP stored in memory successfully')
+        // Store OTP in database
+        try {
+          await query(
+            'INSERT INTO otps (id, identifier, otp, expires_at, method) VALUES ($1, $2, $3, $4, $5)',
+            [`otp-${Date.now()}`, phone, otp, expiresAt, 'sms']
+          )
+          console.log('OTP stored in database successfully')
+        } catch (dbError: any) {
+          console.error('Failed to store OTP in database:', dbError)
+          // Continue anyway - OTP will still be sent
+        }
         
         // Send OTP via Arkesel
         await sendSMSOTP(phone, otp)
@@ -84,9 +80,17 @@ export async function POST(request: NextRequest) {
         
         console.log('Generated OTP for Email:', { email, otp, expiresAt })
         
-        // Store OTP in memory
-        otpStore.set(email, { otp, expiresAt, method: 'email' })
-        console.log('OTP stored in memory successfully')
+        // Store OTP in database
+        try {
+          await query(
+            'INSERT INTO otps (id, identifier, otp, expires_at, method) VALUES ($1, $2, $3, $4, $5)',
+            [`otp-${Date.now()}`, email, otp, expiresAt, 'email']
+          )
+          console.log('OTP stored in database successfully')
+        } catch (dbError: any) {
+          console.error('Failed to store OTP in database:', dbError)
+          // Continue anyway - OTP will still be sent
+        }
         
         // Send OTP via Arkesel
         await sendEmailOTP(email, otp)

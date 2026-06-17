@@ -1,20 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
-
-// In-memory OTP storage (WARNING: This won't work in serverless environments like Vercel)
-// Using global to share between route instances in development
-// For production, consider using Redis or a database
-declare global {
-  var otpStore: Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email' }>
-}
-
-if (!global.otpStore) {
-  global.otpStore = new Map<string, { otp: string; expiresAt: number; method: 'sms' | 'email' }>()
-}
-
-const otpStore = global.otpStore
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,17 +22,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'OTP is required' }, { status: 400 })
     }
 
-    // SMS Method - Verify OTP from memory
+    // SMS Method - Verify OTP from database
     if (method === 'sms') {
-      const storedData = otpStore.get(phone)
+      const result = await query(
+        'SELECT * FROM otps WHERE identifier = $1 AND method = $2 ORDER BY created_at DESC LIMIT 1',
+        [phone, 'sms']
+      )
       
-      if (!storedData) {
+      if (!result.rowCount || result.rowCount === 0) {
         return NextResponse.json({ error: 'OTP not found or expired' }, { status: 400 })
       }
       
+      const storedData = result.rows[0]
+      
       // Check if OTP is expired
-      if (Date.now() > storedData.expiresAt) {
-        otpStore.delete(phone)
+      if (Date.now() > storedData.expires_at) {
+        // Delete expired OTP
+        await query('DELETE FROM otps WHERE id = $1', [storedData.id])
         return NextResponse.json({ error: 'OTP has expired' }, { status: 400 })
       }
 
@@ -54,32 +48,49 @@ export async function POST(request: NextRequest) {
       }
 
       // Clear OTP after successful verification
-      otpStore.delete(phone)
+      await query('DELETE FROM otps WHERE id = $1', [storedData.id])
 
-      // Return success with user info (simplified - no database)
+      // Get existing user from database
+      const existingUser = await query(
+        'SELECT * FROM users WHERE phone = $1',
+        [phone]
+      )
+
+      if (!existingUser.rowCount || existingUser.rowCount === 0) {
+        return NextResponse.json({ error: 'User not found. Please sign up first.' }, { status: 404 })
+      }
+
+      const userData = existingUser.rows[0]
+
       return NextResponse.json({ 
         success: true, 
         message: 'OTP verified successfully via SMS',
         user: {
-          id: `user-${phone}`,
-          name: fullName || phone,
-          phone: phone,
-          email: `${phone}@user.com`
+          id: userData.id,
+          name: userData.name,
+          phone: userData.phone,
+          email: userData.email
         }
       })
     }
 
-    // Email Method - Verify OTP from memory
+    // Email Method - Verify OTP from database
     if (method === 'email') {
-      const storedData = otpStore.get(email)
+      const result = await query(
+        'SELECT * FROM otps WHERE identifier = $1 AND method = $2 ORDER BY created_at DESC LIMIT 1',
+        [email, 'email']
+      )
       
-      if (!storedData) {
+      if (!result.rowCount || result.rowCount === 0) {
         return NextResponse.json({ error: 'OTP not found or expired' }, { status: 400 })
       }
       
+      const storedData = result.rows[0]
+      
       // Check if OTP is expired
-      if (Date.now() > storedData.expiresAt) {
-        otpStore.delete(email)
+      if (Date.now() > storedData.expires_at) {
+        // Delete expired OTP
+        await query('DELETE FROM otps WHERE id = $1', [storedData.id])
         return NextResponse.json({ error: 'OTP has expired' }, { status: 400 })
       }
 
@@ -89,16 +100,27 @@ export async function POST(request: NextRequest) {
       }
 
       // Clear OTP after successful verification
-      otpStore.delete(email)
+      await query('DELETE FROM otps WHERE id = $1', [storedData.id])
 
-      // Return success with user info (simplified - no database)
+      // Get existing user from database
+      const existingUser = await query(
+        'SELECT * FROM users WHERE email = $1',
+        [email]
+      )
+
+      if (!existingUser.rowCount || existingUser.rowCount === 0) {
+        return NextResponse.json({ error: 'User not found. Please sign up first.' }, { status: 404 })
+      }
+
+      const userData = existingUser.rows[0]
+
       return NextResponse.json({ 
         success: true, 
         message: 'OTP verified successfully via email',
         user: {
-          id: `user-${email}`,
-          name: fullName || email.split('@')[0],
-          email: email
+          id: userData.id,
+          name: userData.name,
+          email: userData.email
         }
       })
     }

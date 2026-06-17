@@ -1,50 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
-
-// In-memory products storage (WARNING: This won't work in serverless environments like Vercel)
-// For production, consider using Redis or a database
-declare global {
-  var productsStore: any[]
-}
-
-if (!global.productsStore) {
-  global.productsStore = [
-    {
-      $id: 'prod-1',
-      name: 'Wireless Headphones',
-      description: 'High-quality wireless headphones with noise cancellation',
-      price: 99.99,
-      image: '',
-      category: 'Electronics',
-      stock: 50,
-      userId: 'user-1'
-    },
-    {
-      $id: 'prod-2',
-      name: 'Smart Watch',
-      description: 'Feature-rich smartwatch with health tracking',
-      price: 149.99,
-      image: '',
-      category: 'Electronics',
-      stock: 30,
-      userId: 'user-1'
-    },
-    {
-      $id: 'prod-3',
-      name: 'T-Shirt',
-      description: 'Comfortable cotton t-shirt',
-      price: 19.99,
-      image: '',
-      category: 'Clothing',
-      stock: 100,
-      userId: 'user-1'
-    }
-  ]
-}
-
-const productsStore = global.productsStore
 
 // GET single product
 export async function GET(
@@ -52,15 +10,18 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const product = productsStore.find(p => p.$id === params.id)
+    const result = await query(
+      'SELECT * FROM products WHERE id = $1',
+      [params.id]
+    )
 
-    if (!product) {
+    if (!result.rowCount || result.rowCount === 0) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
     return NextResponse.json({ 
       success: true, 
-      product 
+      product: result.rows[0]
     })
   } catch (error) {
     console.error('Error fetching product:', error)
@@ -77,23 +38,53 @@ export async function PUT(
     const body = await request.json()
     const { name, description, price, image, category, stock } = body
 
-    const index = productsStore.findIndex(p => p.$id === params.id)
-    
-    if (index === -1) {
+    const updates: string[] = []
+    const values: any[] = []
+    let paramIndex = 1
+
+    if (name) {
+      updates.push(`name = $${paramIndex++}`)
+      values.push(name)
+    }
+    if (description) {
+      updates.push(`description = $${paramIndex++}`)
+      values.push(description)
+    }
+    if (price) {
+      updates.push(`price = $${paramIndex++}`)
+      values.push(price)
+    }
+    if (image !== undefined) {
+      updates.push(`image = $${paramIndex++}`)
+      values.push(image)
+    }
+    if (category) {
+      updates.push(`category = $${paramIndex++}`)
+      values.push(category)
+    }
+    if (stock) {
+      updates.push(`stock = $${paramIndex++}`)
+      values.push(stock)
+    }
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+    }
+
+    values.push(params.id)
+
+    const result = await query(
+      `UPDATE products SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values
+    )
+
+    if (!result.rowCount || result.rowCount === 0) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
-    const product = productsStore[index]
-    if (name) product.name = name
-    if (description) product.description = description
-    if (price) product.price = price
-    if (image !== undefined) product.image = image
-    if (category) product.category = category
-    if (stock) product.stock = stock
-
     return NextResponse.json({ 
       success: true, 
-      product 
+      product: result.rows[0]
     })
   } catch (error) {
     console.error('Error updating product:', error)
@@ -107,13 +98,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const index = productsStore.findIndex(p => p.$id === params.id)
-    
-    if (index === -1) {
+    const result = await query(
+      'DELETE FROM products WHERE id = $1 RETURNING *',
+      [params.id]
+    )
+
+    if (!result.rowCount || result.rowCount === 0) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
-
-    productsStore.splice(index, 1)
 
     return NextResponse.json({ 
       success: true, 
