@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE,
   phone VARCHAR(255) UNIQUE,
+  password_hash VARCHAR(255),
   avatar TEXT,
   address TEXT,
   city VARCHAR(255),

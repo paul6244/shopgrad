@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
+import bcrypt from 'bcrypt'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
@@ -33,13 +34,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 })
     }
 
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10)
+
     // Create new user
     const userId = `user-${Date.now()}`
     console.log('Creating user with ID:', userId)
     
     const result = await query(
-      'INSERT INTO users (id, name, email, phone) VALUES ($1, $2, $3, $4) RETURNING *',
-      [userId, name || email.split('@')[0], email, phone || null]
+      'INSERT INTO users (id, name, email, phone, password_hash) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [userId, name || email.split('@')[0], email, phone || null, passwordHash]
     )
 
     console.log('User created successfully:', result.rows[0])
