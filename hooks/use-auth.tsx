@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<void>
-  signup: (email: string, password: string, fullName?: string) => Promise<void>
+  signup: (email: string, password: string, fullName?: string, phone?: string) => Promise<void>
   signupWithPhone: (phone: string, otp?: string, method?: 'sms' | 'email', email?: string, fullName?: string) => Promise<void>
   logout: () => void
   updateProfile: (data: { name?: string; email?: string; phone?: string }) => void
@@ -89,12 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const signup = async (email: string, password: string, fullName?: string) => {
+  const signup = async (email: string, password: string, fullName?: string, phone?: string) => {
     // Call the registration API
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name: fullName })
+      body: JSON.stringify({ email, password, name: fullName, phone })
     })
 
     if (!response.ok) {
