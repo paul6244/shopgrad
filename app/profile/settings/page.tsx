@@ -34,19 +34,39 @@ export default function SettingsPage() {
     }
   }, [user])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (user) {
-      updateProfile({ name, email, phone })
-      // Save settings to localStorage
-      const settings = {
-        notifications,
-        emailPromotions,
-        darkMode,
-        language,
+      try {
+        // Update profile in database
+        const response = await fetch('/api/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, name, email, phone })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update profile')
+        }
+
+        const data = await response.json()
+        
+        // Update local state
+        updateProfile({ name, email, phone })
+        
+        // Save settings to localStorage
+        const settings = {
+          notifications,
+          emailPromotions,
+          darkMode,
+          language,
+        }
+        localStorage.setItem(`settings-${user.id}`, JSON.stringify(settings))
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      } catch (error) {
+        console.error('Error updating profile:', error)
+        alert('Failed to update profile. Please try again.')
       }
-      localStorage.setItem(`settings-${user.id}`, JSON.stringify(settings))
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
     }
   }
 
