@@ -51,7 +51,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Verify OTP directly
+      console.log('Verifying OTP:', { stored: storedData.otp, entered: otp, match: storedData.otp === otp })
       if (storedData.otp !== otp) {
+        console.error('OTP mismatch:', { stored: storedData.otp, entered: otp })
         return NextResponse.json({ error: 'Invalid OTP' }, { status: 400 })
       }
 
