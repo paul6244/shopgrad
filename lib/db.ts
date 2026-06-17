@@ -13,6 +13,8 @@ export async function query(text: string, params?: any[]) {
     return res
   } catch (error) {
     console.error('Database query error:', error)
+    console.error('Query text:', text)
+    console.error('Query params:', params)
     throw error
   }
 }

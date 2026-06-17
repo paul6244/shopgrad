@@ -9,7 +9,19 @@ export async function POST(request: NextRequest) {
   try {
     const { phone, email, method } = await request.json()
 
-    console.log('OTP Request:', { phone, email, method })
+    console.log('OTP Request received:', { phone, email, method })
+
+    // Check if DATABASE_URL is set
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL environment variable is not set')
+      return NextResponse.json({ error: 'Database configuration error' }, { status: 500 })
+    }
+
+    // Check if ARKESEL_API_KEY is set
+    if (!process.env.ARKESEL_API_KEY) {
+      console.error('ARKESEL_API_KEY environment variable is not set')
+      return NextResponse.json({ error: 'Arkesel API key is not configured' }, { status: 500 })
+    }
 
     // Validate based on method
     if (method === 'sms' && !phone) {

@@ -8,6 +8,14 @@ export async function POST(request: NextRequest) {
   try {
     const { phone, email, otp, method, fullName } = await request.json()
 
+    console.log('Verify OTP Request received:', { phone, email, otp, method, fullName })
+
+    // Check if DATABASE_URL is set
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL environment variable is not set')
+      return NextResponse.json({ error: 'Database configuration error' }, { status: 500 })
+    }
+
     // Validate based on method
     if (method === 'sms' && !phone) {
       return NextResponse.json({ error: 'Phone number and OTP are required for SMS' }, { status: 400 })

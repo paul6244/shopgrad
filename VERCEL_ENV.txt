@@ -1,0 +1,10 @@
+# Vercel Environment Variables
+# Copy these values to your Vercel project settings:
+# Vercel Project → Settings → Environment Variables
+
+DATABASE_URL=postgresql://neondb_owner:npg_fe1nlFhxBSs3@ep-dark-bird-aq67buk9-pooler.c-8.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
+ARKESEL_API_KEY=em9nbUFkU01JU1ZUcklyeW1weHo
+
+# Optional (for payments):
+PAYSTACK_PUBLIC_KEY=pk_live_75eb9865eeafe7cd6918493de7162f39faf7f3a5
+PAYSTACK_SECRET_KEY=sk_live_e76d7224b23bbd641e30c91b18a5ea62e7343b1b

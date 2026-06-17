@@ -9,8 +9,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, password, name, phone } = body
 
+    console.log('Register request received:', { email, name, phone })
+
     if (!email || !password) {
+      console.error('Missing required fields:', { email: !!email, password: !!password })
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
+    }
+
+    // Check if DATABASE_URL is set
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL environment variable is not set')
+      return NextResponse.json({ error: 'Database configuration error' }, { status: 500 })
     }
 
     // Check if user already exists
@@ -20,15 +29,20 @@ export async function POST(request: NextRequest) {
     )
 
     if (existingUser.rowCount && existingUser.rowCount > 0) {
+      console.log('User already exists:', email)
       return NextResponse.json({ error: 'User already exists' }, { status: 400 })
     }
 
     // Create new user
     const userId = `user-${Date.now()}`
+    console.log('Creating user with ID:', userId)
+    
     const result = await query(
       'INSERT INTO users (id, name, email, phone) VALUES ($1, $2, $3, $4) RETURNING *',
       [userId, name || email.split('@')[0], email, phone || null]
     )
+
+    console.log('User created successfully:', result.rows[0])
 
     return NextResponse.json({ 
       success: true, 
