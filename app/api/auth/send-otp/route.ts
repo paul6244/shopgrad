@@ -61,13 +61,15 @@ export async function POST(request: NextRequest) {
         }
         
         // Send OTP via Arkesel
-        await sendSMSOTP(phone, otp)
-        console.log('OTP sent via Arkesel successfully')
+        console.log('Sending OTP via Arkesel to phone:', phone)
+        const arkeselResult = await sendSMSOTP(phone, otp)
+        console.log('Arkesel response:', arkeselResult)
         
         return NextResponse.json({ 
           success: true, 
           message: 'OTP sent successfully via Arkesel SMS',
-          method: 'sms'
+          method: 'sms',
+          arkeselResponse: arkeselResult
         })
       } catch (arkeselError: any) {
         console.error('Arkesel error:', arkeselError)
