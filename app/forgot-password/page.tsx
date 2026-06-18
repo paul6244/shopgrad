@@ -3,25 +3,42 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react"
+import { Phone, ArrowLeft, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState("")
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
-    if (!email) {
-      setError("Please enter your email address")
+    if (!phone) {
+      setError("Please enter your phone number")
       return
     }
 
-    // Simulate sending reset email
-    setSubmitted(true)
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to send reset SMS')
+      }
+
+      // Redirect to reset password page with phone
+      router.push(`/reset-password?phone=${encodeURIComponent(phone)}`)
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset SMS. Please try again.')
+    }
   }
 
   return (
@@ -34,54 +51,57 @@ export default function ForgotPasswordPage() {
       </div>
 
       <main className="flex-1 flex flex-col px-6 pt-10">
-        {!submitted ? (
-          <>
-            <h1 className="text-4xl font-bold text-black mb-4">Forgot Password?</h1>
-            <p className="text-black mb-8 opacity-80">
-              Enter your email address and we'll send you a link to reset your password.
-            </p>
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md mx-auto w-full">
+          {!submitted ? (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Forgot Password?</h1>
+              <p className="text-gray-600 mb-6 text-center">
+                Enter your phone number and we'll send you a code to reset your password.
+              </p>
 
-            {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-6">{error}</div>}
+              {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-6">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-black" />
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder="+233XXXXXXXXX"
+                    className="w-full py-3 pl-12 pr-4 bg-gray-50 text-gray-700 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                  />
                 </div>
-                <input
-                  type="email"
-                  placeholder="Enter email"
-                  className="w-full py-4 pl-12 pr-4 bg-[#f2f2f7] text-gray-700 rounded-full focus:outline-none"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
 
-              <div className="flex justify-center mt-8">
-                <button type="submit" className="bg-[#f2f2f7] text-black font-bold py-4 px-8 rounded-full min-w-[160px]">
-                  Send Reset Link
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-rose-400 to-purple-500 text-white font-bold py-3 px-8 rounded-full hover:from-rose-500 hover:to-purple-600 transition-all shadow-lg"
+                >
+                  Send Reset Code
                 </button>
+              </form>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <CheckCircle className="h-10 w-10 text-green-500" />
               </div>
-            </form>
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center flex-1">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-              <CheckCircle className="h-10 w-10 text-green-500" />
+              <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">Check your SMS</h1>
+              <p className="text-gray-600 mb-6 text-center">
+                We've sent a password reset code to {phone}. Please check your SMS and follow the instructions.
+              </p>
+              <Link
+                href="/login"
+                className="w-full bg-gradient-to-r from-rose-400 to-purple-500 text-white font-bold py-3 px-8 rounded-full hover:from-rose-500 hover:to-purple-600 transition-all shadow-lg text-center"
+              >
+                Back to Sign In
+              </Link>
             </div>
-            <h1 className="text-3xl font-bold text-black mb-4 text-center">Check your email</h1>
-            <p className="text-black mb-8 opacity-80 text-center">
-              We've sent a password reset link to {email}. Please check your inbox and follow the instructions.
-            </p>
-            <Link
-              href="/login"
-              className="bg-[#f2f2f7] text-black font-bold py-4 px-8 rounded-full min-w-[160px] text-center"
-            >
-              Back to Sign In
-            </Link>
-          </div>
-        )}
+          )}
+        </div>
       </main>
 
       {/* iPhone Home Indicator */}
