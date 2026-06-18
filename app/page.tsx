@@ -366,6 +366,91 @@ const products = [
     image: "https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=500&h=500&fit=crop&q=80",
     category: "Home",
   },
+  // Smartphones
+  { id: 51, name: "iPhone 15 Pro Max", price: 14500, image: "https://i.pinimg.com/736x/cb/2a/d0/cb2ad0bbc24149758f88797d22b54ab7.jpg", category: "smartphones" },
+  { id: 52, name: "Samsung Galaxy S24 Ultra", price: 11800, image: "https://i.pinimg.com/1200x/5b/d8/93/5bd893c5ec4277bc4cff54fbb3e79afb.jpg", category: "smartphones" },
+  { id: 53, name: "Google Pixel 8 Pro", price: 9600, image: "https://i.pinimg.com/1200x/ed/93/e5/ed93e514854b5aac82409189a813db4e.jpg", category: "smartphones" },
+  { id: 54, name: "Xiaomi 14 Pro", price: 7400, image: "https://i.pinimg.com/736x/73/bc/9e/73bc9e39d2052a5a40535dc2d0d991f6.jpg", category: "smartphones" },
+  { id: 55, name: "OnePlus 12", price: 8200, image: "https://i.pinimg.com/736x/8b/0a/ff/8b0affab4dc57570bf6c3e717684332d.jpg", category: "smartphones" },
+  { id: 56, name: "Oppo Find X6 Pro", price: 6800, image: "https://i.pinimg.com/736x/21/45/89/2145899f8c5b2e3a7c8d9e6f5a4b3c2d.jpg", category: "smartphones" },
+  { id: 57, name: "Vivo X100 Pro", price: 7200, image: "https://i.pinimg.com/736x/98/76/54/987654321fedcba9876543210fedcba.jpg", category: "smartphones" },
+  { id: 58, name: "Nothing Phone 2", price: 5500, image: "https://i.pinimg.com/736x/ab/cd/ef/abcdef1234567890abcdef1234567890.jpg", category: "smartphones" },
+
+  // Laptops
+  { id: 59, name: "MacBook Air M3", price: 16000, image: "https://i.pinimg.com/1200x/fb/91/75/fb917567ea462ee7c6970b7d4c620a49.jpg", category: "laptops" },
+  { id: 60, name: "HP Spectre x360", price: 15200, image: "https://i.pinimg.com/1200x/3d/24/99/3d2499097573b4a6cf1ec23b04e1fdfa.jpg", category: "laptops" },
+  { id: 61, name: "Dell XPS 15", price: 17500, image: "https://i.pinimg.com/1200x/ae/6c/ac/ae6cacbcd79fa5603c6cbca5a2bff03b.jpg", category: "laptops" },
+  { id: 62, name: "Lenovo ThinkPad X1", price: 14000, image: "https://i.pinimg.com/474x/40/50/f1/4050f17d38b5da7d9961b278f9cd0e06.jpg", category: "laptops" },
+  { id: 63, name: "ASUS ROG Zephyrus", price: 19500, image: "https://i.pinimg.com/736x/cb/40/68/cb40685221f65875289d73b05c940169.jpg", category: "laptops" },
+  { id: 64, name: "Microsoft Surface Pro 9", price: 13500, image: "https://i.pinimg.com/736x/12/34/56/1234567890abcdef1234567890abcdef.jpg", category: "laptops" },
+  { id: 65, name: "Razer Blade 16", price: 21000, image: "https://i.pinimg.com/736x/fe/dc/ba/fedcba9876543210fedcba9876543210.jpg", category: "laptops" },
+  { id: 66, name: "Acer Swift 3", price: 8500, image: "https://i.pinimg.com/736x/87/65/43/876543210fedcba9876543210fedcba.jpg", category: "laptops" },
+
+  // Tablets
+  { id: 67, name: "iPad Pro 12.9\"", price: 12000, image: "https://i.pinimg.com/736x/c3/c5/d6/c3c5d61a8c22f8a5487255a33ded6f76.jpg", category: "tablets" },
+  { id: 68, name: "Samsung Galaxy Tab S9", price: 8500, image: "https://i.pinimg.com/736x/54/32/10/543210fedcba9876543210fedcba9876.jpg", category: "tablets" },
+  { id: 69, name: "Microsoft Surface Go 3", price: 6500, image: "https://i.pinimg.com/736x/ba/98/76/ba9876543210fedcba9876543210fedc.jpg", category: "tablets" },
+  { id: 70, name: "Xiaomi Pad 6", price: 4500, image: "https://i.pinimg.com/736x/10/fe/dc/10fedcba9876543210fedcba98765432.jpg", category: "tablets" },
+
+  // Headphones & Audio
+  { id: 71, name: "Sony WH-1000XM5", price: 4500, image: "https://i.pinimg.com/736x/2e/ad/55/2ead5536541de6438ed7bd2d67bf9b03.jpg", category: "headphones" },
+  { id: 72, name: "Beats Studio Pro", price: 3800, image: "https://i.pinimg.com/736x/2e/f8/ad/2ef8addea9403e915541df08d0ff46a1.jpg", category: "headphones" },
+  { id: 73, name: "JBL Tune 760NC", price: 1500, image: "https://i.pinimg.com/736x/fe/69/2e/fe692e0f0d3677c188c67c92e37648d0.jpg", category: "headphones" },
+  { id: 74, name: "Apple AirPods Pro", price: 200, image: "/image/headset.png", category: "headphones" },
+  { id: 75, name: "Apple AirPods", price: 150, image: "/image/air.png", category: "headphones" },
+  { id: 76, name: "Bose QuietComfort Ultra", price: 5200, image: "https://i.pinimg.com/736x/76/54/32/76543210fedcba9876543210fedcba98.jpg", category: "headphones" },
+  { id: 77, name: "Sennheiser Momentum 4", price: 4800, image: "https://i.pinimg.com/736x/32/10/fe/3210fedcba9876543210fedcba987654.jpg", category: "headphones" },
+  { id: 78, name: "Anker Soundcore Q35", price: 1200, image: "https://i.pinimg.com/736x/fe/dc/ba/fedcba9876543210fedcba9876543210.jpg", category: "headphones" },
+
+  // Gaming
+  { id: 79, name: "PlayStation 5", price: 8900, image: "https://i.pinimg.com/736x/55/ba/7e/55ba7e148dcd3aeeea4eb80414aadab5.jpg", category: "gaming" },
+  { id: 80, name: "Xbox Series X", price: 8300, image: "https://i.pinimg.com/736x/f2/36/4d/f2364d095cc49b756acd943e303102b0.jpg", category: "gaming" },
+  { id: 81, name: "DualSense Controller", price: 950, image: "https://i.pinimg.com/1200x/f5/f4/0e/f5f40e732523e984ef3084583e0d8d41.jpg", category: "gaming" },
+  { id: 82, name: "Nintendo Switch OLED", price: 4500, image: "https://i.pinimg.com/736x/cb/a9/87/cba9876543210fedcba9876543210fed.jpg", category: "gaming" },
+  { id: 83, name: "Steam Deck", price: 5500, image: "https://i.pinimg.com/736x/8b/3a/5f/8b3a5ff5a8d2e4f1b7c9e2d3a8b5c6d.jpg", category: "gaming" },
+  { id: 84, name: "Razer BlackWidow V4", price: 2200, image: "https://i.pinimg.com/736x/9c/2a/4b/9c2a4b3d5e6f7a8b9c0d1e2f3a4b5c6d.jpg", category: "gaming" },
+  { id: 85, name: "Logitech G Pro X", price: 2800, image: "https://i.pinimg.com/736x/f1/2e/8d/f12e8d3a4b5c6d7e8f9a0b1c2d3e4f5.jpg", category: "gaming" },
+  { id: 86, name: "USB Gaming mouse", price: 150, image: "https://i.pinimg.com/736x/3a/7b/9c/3a7b9c4d5e6f7a8b9c0d1e2f3a4b5c6d.jpg", category: "gaming" },
+  { id: 87, name: "Wireless Gaming Mouse", price: 190, image: "https://i.pinimg.com/1200x/f9/20/06/f920067f7d78218df227e9faaf7529ea.jpg", category: "gaming" },
+
+  // Smartwatches
+  { id: 88, name: "Apple Watch Series 9", price: 4200, image: "https://i.pinimg.com/1200x/fe/9a/59/fe9a59044c893818ff937e091b4ebd58.jpg", category: "smartwatches" },
+  { id: 89, name: "Samsung Galaxy Watch 6", price: 3200, image: "https://i.pinimg.com/736x/63/52/45/635245ff65d498791679cedcf7e3186b.jpg", category: "smartwatches" },
+  { id: 90, name: "Ultra 3 Watch", price: 200, image: "/image/ulta.png", category: "smartwatches" },
+  { id: 91, name: "Garmin Fenix 7", price: 5500, image: "https://i.pinimg.com/736x/8d/4e/6a/8d4e6a7b8c9d0e1f2a3b4c5d6e7f8.jpg", category: "smartwatches" },
+  { id: 92, name: "Fitbit Sense 2", price: 2800, image: "https://i.pinimg.com/736x/9f/3a/7b/9f3a7b8c9d0e1f2a3b4c5d6e7f8a9.jpg", category: "smartwatches" },
+  { id: 93, name: "Amazfit GTR 4", price: 1500, image: "https://i.pinimg.com/736x/2b/6c/8d/2b6c8d9e0f1a2b3c4d5e6f7a8b9c0d.jpg", category: "smartwatches" },
+
+  // Cameras & Photography
+  { id: 94, name: "Canon EOS R6", price: 18500, image: "https://i.pinimg.com/736x/8a/9b/4c/8a9b4c5d6e7f8a9b0c1d2e3f4a5b6.jpg", category: "cameras" },
+  { id: 95, name: "Sony A7 IV", price: 22000, image: "https://i.pinimg.com/736x/7b/9c/2e/7b9c2e4d5f6a7b8c9d0e1f2a3b4c5.jpg", category: "cameras" },
+  { id: 96, name: "DJI Mini 3 Pro", price: 7500, image: "https://i.pinimg.com/736x/4e/6f/8a/4e6f8a2b3c4d5e6f7a8b9c0d1e2.jpg", category: "cameras" },
+  { id: 97, name: "GoPro Hero 12", price: 3500, image: "https://i.pinimg.com/736x/9a/2b/4c/9a2b4c5d6e7f8a9b0c1d2e3f4a5.jpg", category: "cameras" },
+  { id: 98, name: "Instax Mini Evo", price: 850, image: "https://i.pinimg.com/736x/5c/7d/9e/5c7d9e0f1a2b3c4d5e6f7a8b9c.jpg", category: "cameras" },
+
+  // Smart Home
+  { id: 99, name: "Amazon Echo Dot 5", price: 450, image: "https://i.pinimg.com/736x/6f/8a/cd/6f8acd0e1f2a3b4c5d6e7f8a9b0c.jpg", category: "smarthome" },
+  { id: 100, name: "Google Nest Hub", price: 1200, image: "https://i.pinimg.com/736x/1e/3a/5c/1e3a5c7d8e9f0a1b2c3d4e5f6a7.jpg", category: "smarthome" },
+  { id: 101, name: "Philips Hue Lights", price: 850, image: "https://i.pinimg.com/736x/8b/2c/4d/8b2c4d5e6f7a8b9c0d1e2f3a4.jpg", category: "smarthome" },
+  { id: 102, name: "Ring Video Doorbell", price: 2200, image: "https://i.pinimg.com/736x/3c/5d/7e/3c5d7e8f9a0b1c2d3e4f5a6b7.jpg", category: "smarthome" },
+  { id: 103, name: "TP-Link Smart Plug", price: 250, image: "https://i.pinimg.com/736x/7a/9c/1e/7a9c1e2f3a4b5c6d7e8f9a0b1.jpg", category: "smarthome" },
+
+  // Accessories
+  { id: 104, name: "Samsung 55\" Smart TV", price: 7500, image: "https://i.pinimg.com/1200x/9f/37/5b/9f375b72494224eb5c43b3589fcab6d4.jpg", category: "accessories" },
+  { id: 105, name: "LG OLED 65\"", price: 14000, image: "https://i.pinimg.com/736x/c6/d6/d0/c6d6d07259aeffe54ecb27dfac5f90e8.jpg", category: "accessories" },
+  { id: 106, name: "Tecknet wireless keyboard", price: 200, image: "https://i.pinimg.com/1200x/15/4b/53/154b5391dfe3dbc05f09d2d7a158dcff.jpg", category: "accessories" },
+  { id: 107, name: "Power Bank 20000mAh", price: 205, image: "https://i.pinimg.com/736x/92/69/86/9269867d21c331a588a174385feea6fe.jpg", category: "accessories" },
+  { id: 108, name: "Logitech C920 Webcam", price: 450, image: "https://i.pinimg.com/1200x/1b/8c/1e/1b8c1e7a9c0d2f5b4a3c8e5b6f9a7c8.jpg", category: "accessories" },
+  { id: 109, name: "SanDisk 1TB SSD", price: 850, image: "https://i.pinimg.com/736x/4a/7b/9c/4a7b9c2d3e4f5a6b7c8d9e0f1a2b3.jpg", category: "accessories" },
+  { id: 110, name: "USB-C Hub 7-in-1", price: 450, image: "https://i.pinimg.com/736x/8c/3d/6f/8c3d6f0e1f2a3b4c5d6e7f8a9b0c1.jpg", category: "accessories" },
+  { id: 111, name: "Wireless Charger 15W", price: 350, image: "https://i.pinimg.com/736x/2e/5a/8b/2e5a8b3c4d5e6f7a8b9c0d1e2f3a4.jpg", category: "accessories" },
+  { id: 112, name: "Bluetooth Speaker JBL", price: 650, image: "https://i.pinimg.com/736x/9f/1a/4d/9f1a4d7e8f9a0b1c2d3e4f5a6b7.jpg", category: "accessories" },
+  { id: 113, name: "Cable Management Kit", price: 150, image: "https://i.pinimg.com/736x/6b/8c/1e/6b8c1e2f3a4b5c6d7e8f9a0b1c2.jpg", category: "accessories" },
+
+  // Premium originals
+  { id: 114, name: "Apple MacBook Pro 16-inch", price: 9000, image: "https://i.pinimg.com/736x/5f/8a/3c/5f8a3c7d9e0f1a2b3c4d5e6f7a8.jpg", category: "laptops" },
+  { id: 115, name: "Apple iPad Pro 12.9-inch", price: 1000, image: "https://i.pinimg.com/736x/a7/b8/c9/a7b8c9d0e1f2a3b4c5d6e7f8a9b0c.jpg", category: "tablets" },
+  { id: 116, name: "Video Camera", price: 2530, image: "/image/vg.png", category: "cameras" },
 ]
 
 export default function ShoppingApp() {
@@ -448,7 +533,22 @@ export default function ShoppingApp() {
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Categories */}
         <div className="flex overflow-x-auto pb-2 mb-6 gap-2 scrollbar-hide">
-          {["All", "Electronics", "Fashion", "Home", "Fitness"].map((category) => (
+          {[
+            "All",
+            "Electronics",
+            "Fashion",
+            "Home",
+            "Fitness",
+            "smartphones",
+            "laptops",
+            "tablets",
+            "headphones",
+            "gaming",
+            "smartwatches",
+            "cameras",
+            "smarthome",
+            "accessories",
+          ].map((category) => (
             <button
               key={category}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
