@@ -50,7 +50,7 @@ export default function LoginPage() {
         await login(email, password)
         router.push("/")
       } catch (err) {
-        setError("Failed to sign in. Please check your credentials.")
+        setError("Password is incorrect. Please check your credentials.")
       }
     } else {
       if (!otp || otp.length !== 6) {

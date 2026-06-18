@@ -61,7 +61,11 @@ export default function SignUpPage() {
       await signup(email, password, fullName, phone)
       router.push("/")
     } catch (err: any) {
-      setError(err.message || "Failed to create an account. Please try again.")
+      if (err.message === 'User already exists') {
+        setError('User already exists. Please use a different email or phone number.')
+      } else {
+        setError(err.message || "Failed to create an account. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
