@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useFavorites } from "@/hooks/use-favorites"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import { useTheme } from "next-themes"
 
 // Sample product data
 const products = [
@@ -415,12 +416,22 @@ export default function ShoppingApp() {
   const { isFavorite } = useFavorites()
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (categoryParam) {
       setSearchQuery(categoryParam)
     }
   }, [categoryParam])
+
+  if (!mounted) return null
+
+  const isDark = theme === "dark"
 
   const filteredProducts = products.filter(
     (product) =>
@@ -429,18 +440,18 @@ export default function ShoppingApp() {
   )
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500">
+    <div className={`flex flex-col min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500'}`}>
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white bg-opacity-90 backdrop-blur-sm shadow-sm">
+      <header className={`sticky top-0 z-10 backdrop-blur-sm shadow-sm ${isDark ? 'bg-gray-800 bg-opacity-90' : 'bg-white bg-opacity-90'}`}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold">
+            <Link href="/" className={`text-2xl font-bold ${isDark ? 'text-white' : ''}`}>
               ShopGrad
             </Link>
             <div className="flex items-center space-x-4">
               {user ? (
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm hidden md:inline">Hi, {user.name}</span>
+                  <span className={`text-sm hidden md:inline ${isDark ? 'text-white' : ''}`}>Hi, {user.name}</span>
                   <Link
                     href="/profile"
                     className="w-8 h-8 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white"
@@ -457,7 +468,7 @@ export default function ShoppingApp() {
                 </Link>
               )}
               <button className="relative" onClick={() => setIsCartOpen(true)}>
-                <ShoppingBag className="h-6 w-6" />
+                <ShoppingBag className={`h-6 w-6 ${isDark ? 'text-white' : ''}`} />
                 {cartItems.length > 0 && (
                   <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {cartItems.length}
@@ -470,12 +481,12 @@ export default function ShoppingApp() {
           {/* Search Bar */}
           <div className="mt-4 relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+              <Search className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
             </div>
             <input
               type="text"
               placeholder="Search products..."
-              className="w-full py-3 pl-10 pr-4 bg-[#f2f2f7] text-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-300"
+              className={`w-full py-3 pl-10 pr-4 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-300 ${isDark ? 'bg-gray-700 text-white border-gray-600' : 'bg-[#f2f2f7] text-gray-700'}`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -494,7 +505,7 @@ export default function ShoppingApp() {
                 (category === "All" && !searchQuery) ||
                 (category !== "All" && searchQuery.toLowerCase() === category.toLowerCase())
                   ? "bg-rose-500 text-white"
-                  : "bg-white hover:bg-rose-100"
+                  : `${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-white hover:bg-rose-100'}`
               }`}
               onClick={() => setSearchQuery(category === "All" ? "" : category)}
             >
@@ -505,7 +516,7 @@ export default function ShoppingApp() {
 
         {/* Featured Products */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 text-white">Featured Products</h2>
+          <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-white'}`}>Featured Products</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.slice(6, 9).map((product) => (
               <ProductCard key={product.id} product={product} featured isFavorite={isFavorite(product.id)} />
@@ -514,7 +525,7 @@ export default function ShoppingApp() {
         </div>
 
         {/* Products Grid */}
-        <h2 className="text-xl font-bold mb-4 text-white">All Products</h2>
+        <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-white'}`}>All Products</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} isFavorite={isFavorite(product.id)} />
@@ -523,7 +534,7 @@ export default function ShoppingApp() {
 
         {filteredProducts.length === 0 && (
           <div className="text-center py-10">
-            <p className="text-lg text-white">No products found matching "{searchQuery}"</p>
+            <p className={`text-lg ${isDark ? 'text-white' : 'text-white'}`}>No products found matching "{searchQuery}"</p>
           </div>
         )}
 
@@ -542,7 +553,7 @@ export default function ShoppingApp() {
       </main>
 
       {/* Navigation */}
-      <nav className="sticky bottom-0 bg-white bg-opacity-90 backdrop-blur-sm shadow-lg">
+      <nav className={`sticky bottom-0 backdrop-blur-sm shadow-lg ${isDark ? 'bg-gray-800 bg-opacity-90' : 'bg-white bg-opacity-90'}`}>
         <div className="container mx-auto px-4">
           <div className="flex justify-around py-3">
             {[
@@ -554,7 +565,7 @@ export default function ShoppingApp() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex flex-col items-center ${item.name === "Home" ? "text-rose-500 font-medium" : ""}`}
+                className={`flex flex-col items-center ${item.name === "Home" ? "text-rose-500 font-medium" : isDark ? 'text-white' : ''}`}
               >
                 <span className="text-sm">{item.name}</span>
               </Link>

@@ -1,14 +1,21 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, ShoppingBag, Heart, Settings, LogOut } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
+import { useTheme } from "next-themes"
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
   const router = useRouter()
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!user) {
@@ -16,9 +23,11 @@ export default function ProfilePage() {
     }
   }, [user, router])
 
-  if (!user) {
+  if (!user || !mounted) {
     return null
   }
+
+  const isDark = theme === "dark"
 
   const handleLogout = () => {
     logout()
@@ -26,16 +35,16 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500">
+    <div className={`flex flex-col min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500'}`}>
       <div className="px-4 py-4 sm:px-6">
-        <Link href="/" className="inline-flex items-center text-black">
+        <Link href="/" className={`inline-flex items-center ${isDark ? 'text-white' : 'text-black'}`}>
           <ArrowLeft className="h-5 w-5 mr-1" />
           Back to Shop
         </Link>
       </div>
 
       <main className="flex-1 container mx-auto px-2 py-4 sm:px-4 sm:py-6">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg overflow-hidden`}>
           <div className="bg-gradient-to-r from-rose-400 to-purple-500 px-4 py-6 sm:px-6 sm:py-8 text-white">
             <div className="flex flex-col sm:flex-row items-center">
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-purple-500 text-2xl font-bold">
@@ -52,7 +61,7 @@ export default function ProfilePage() {
             <div className="space-y-3 sm:space-y-4">
               <Link
                 href="/profile/orders"
-                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400"
+                className={`flex items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400 ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-50'}`}
                 tabIndex={0}
               >
                 <div className="flex items-center">
@@ -64,7 +73,7 @@ export default function ProfilePage() {
 
               <Link
                 href="/profile/wishlist"
-                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400"
+                className={`flex items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400 ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-50'}`}
                 tabIndex={0}
               >
                 <div className="flex items-center">
@@ -76,7 +85,7 @@ export default function ProfilePage() {
 
               <Link
                 href="/profile/settings"
-                className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400"
+                className={`flex items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-gray-100 focus:bg-gray-200 active:bg-gray-200 transition outline-none ring-0 focus:ring-2 focus:ring-rose-400 ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-50'}`}
                 tabIndex={0}
               >
                 <div className="flex items-center">
@@ -88,7 +97,7 @@ export default function ProfilePage() {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center justify-between w-full p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 text-left transition"
+                className={`flex items-center justify-between w-full p-3 sm:p-4 rounded-lg text-left transition ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`}
               >
                 <div className="flex items-center">
                   <LogOut className="h-5 w-5 mr-3 text-rose-500" />
