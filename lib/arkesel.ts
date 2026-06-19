@@ -29,6 +29,19 @@ function isValidPhone(phone: string): boolean {
   return phoneRegex.test(phone.replace(/\s/g, ''))
 }
 
+// Helper function to format phone number for Arkesel
+function formatPhoneForArkesel(phone: string): string {
+  // Remove any spaces
+  let formattedPhone = phone.replace(/\s/g, '')
+  
+  // If it starts with +, remove it (Arkesel might prefer numbers without +)
+  if (formattedPhone.startsWith('+')) {
+    formattedPhone = formattedPhone.substring(1)
+  }
+  
+  return formattedPhone
+}
+
 // Helper function to validate email format
 function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -50,6 +63,9 @@ export async function sendSMS({ phone, message, sender = 'ShopGrad' }: SendSMSPa
     throw new Error('Message cannot be empty')
   }
 
+  // Format phone number for Arkesel
+  const formattedPhone = formatPhoneForArkesel(phone)
+
   try {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
@@ -63,7 +79,7 @@ export async function sendSMS({ phone, message, sender = 'ShopGrad' }: SendSMSPa
       body: JSON.stringify({
         sender: sender,
         message: message,
-        recipients: [phone]
+        recipients: [formattedPhone]
       }),
       signal: controller.signal
     })
