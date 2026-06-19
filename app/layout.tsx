@@ -5,6 +5,7 @@ import "./globals.css"
 import { CartProvider } from "@/hooks/use-cart"
 import { AuthProvider } from "@/hooks/use-auth"
 import { FavoritesProvider } from "@/hooks/use-favorites"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,11 +22,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <FavoritesProvider>
-            <CartProvider>{children}</CartProvider>
-          </FavoritesProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <FavoritesProvider>
+              <CartProvider>{children}</CartProvider>
+            </FavoritesProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

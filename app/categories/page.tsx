@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Search } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 
 // Category data
 const categories = [
@@ -55,6 +56,16 @@ const categories = [
 export default function CategoriesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
+  const isDark = theme === "dark"
 
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -65,27 +76,27 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500">
+    <div className={`flex flex-col min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500'}`}>
       {/* Header */}
       <div className="px-6 py-4">
-        <Link href="/" className="inline-flex items-center text-black">
+        <Link href="/" className={`inline-flex items-center ${isDark ? 'text-white' : 'text-black'}`}>
           <ArrowLeft className="h-5 w-5 mr-1" />
           Back to Shop
         </Link>
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold text-white mb-6">Categories</h1>
+        <h1 className={`text-3xl font-bold mb-6 ${isDark ? 'text-white' : 'text-white'}`}>Categories</h1>
 
         {/* Search Bar */}
         <div className="relative mb-8">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
           </div>
           <input
             type="text"
             placeholder="Search categories..."
-            className="w-full py-3 pl-10 pr-4 bg-white bg-opacity-90 text-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-300"
+            className={`w-full py-3 pl-10 pr-4 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-300 ${isDark ? 'bg-gray-700 text-white' : 'bg-white bg-opacity-90 text-gray-700'}`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -96,7 +107,7 @@ export default function CategoriesPage() {
           {filteredCategories.map((category) => (
             <div
               key={category.id}
-              className="bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+              className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow`}
               onClick={() => handleCategoryClick(category.id)}
             >
               <div className="relative h-40">
@@ -115,7 +126,7 @@ export default function CategoriesPage() {
                 </div>
               </div>
               <div className="p-4">
-                <p className="text-gray-600">{category.description}</p>
+                <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{category.description}</p>
               </div>
             </div>
           ))}
@@ -123,13 +134,13 @@ export default function CategoriesPage() {
 
         {filteredCategories.length === 0 && (
           <div className="text-center py-10">
-            <p className="text-lg text-white">No categories found matching "{searchQuery}"</p>
+            <p className={`text-lg ${isDark ? 'text-white' : 'text-white'}`}>No categories found matching "{searchQuery}"</p>
           </div>
         )}
       </main>
 
       {/* Navigation */}
-      <nav className="sticky bottom-0 bg-white bg-opacity-90 backdrop-blur-sm shadow-lg">
+      <nav className={`sticky bottom-0 backdrop-blur-sm shadow-lg ${isDark ? 'bg-gray-800 bg-opacity-90' : 'bg-white bg-opacity-90'}`}>
         <div className="container mx-auto px-4">
           <div className="flex justify-around py-3">
             {[
@@ -142,7 +153,7 @@ export default function CategoriesPage() {
                 key={item.name}
                 href={item.href}
                 className={`flex flex-col items-center ${
-                  item.name === "Categories" ? "text-rose-500 font-medium" : ""
+                  item.name === "Categories" ? "text-rose-500 font-medium" : isDark ? 'text-white' : ''
                 }`}
               >
                 <span className="text-sm">{item.name}</span>
