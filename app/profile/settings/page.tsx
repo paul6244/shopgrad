@@ -190,12 +190,6 @@ export default function SettingsPage() {
                     <Phone className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
                   </div>
                 </div>
-                <button
-                  onClick={handleSave}
-                  className="w-full py-2 bg-gradient-to-r from-rose-400 to-purple-500 text-white rounded-lg font-medium hover:from-rose-500 hover:to-purple-600 transition-colors"
-                >
-                  {saved ? "Saved!" : "Save Changes"}
-                </button>
               </div>
             </div>
           </div>
@@ -387,6 +381,16 @@ export default function SettingsPage() {
           </button>
         </div>
       </main>
+
+      {/* Sticky Save Button */}
+      <div className={`sticky bottom-0 p-4 backdrop-blur-sm ${isDark ? 'bg-gray-900/90' : 'bg-white/90'}`}>
+        <button
+          onClick={handleSave}
+          className="w-full py-3 bg-gradient-to-r from-rose-400 to-purple-500 text-white rounded-xl font-bold hover:from-rose-500 hover:to-purple-600 transition-all shadow-lg"
+        >
+          {saved ? "Saved!" : "Save Changes"}
+        </button>
+      </div>
     </div>
   )
 }
