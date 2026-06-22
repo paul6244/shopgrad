@@ -110,7 +110,7 @@ export default function CheckoutPage() {
     }
   }, [mounted, cartItems.length, currentStep, router])
 
-  const shippingCost = 30
+  const shippingCost = 10
   const tax = cartTotal * 0.12
   const totalAmount = cartTotal + shippingCost + tax
 

@@ -4,10 +4,36 @@
   "description": "Your favorite shopping destination",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#f43f5e",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "scope": "/",
+  "categories": ["shopping", "retail"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Shop",
+      "short_name": "Shop",
+      "description": "Browse products",
+      "url": "/",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Categories",
+      "short_name": "Categories",
+      "description": "View categories",
+      "url": "/categories",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Favorites",
+      "short_name": "Favorites",
+      "description": "View favorites",
+      "url": "/favorites",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icon.svg",

@@ -1,0 +1,48 @@
+{
+  "packageId": "com.shopgrad.app",
+  "host": "localhost:3000",
+  "name": "ShopGrad",
+  "launcherName": "ShopGrad",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#f43f5e",
+  "backgroundColor": "#ffffff",
+  "iconUrl": "https://localhost:3000/icon.svg",
+  "maskableIconUrl": "https://localhost:3000/icon.svg",
+  "shortcuts": [
+    {
+      "name": "Shop",
+      "shortName": "Shop",
+      "url": "/",
+      "icon": "https://localhost:3000/icon.svg"
+    },
+    {
+      "name": "Categories",
+      "shortName": "Categories",
+      "url": "/categories",
+      "icon": "https://localhost:3000/icon.svg"
+    },
+    {
+      "name": "Favorites",
+      "shortName": "Favorites",
+      "url": "/favorites",
+      "icon": "https://localhost:3000/icon.svg"
+    }
+  ],
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://localhost:3000/manifest.json",
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "retentionPeriod": "90"
+}
