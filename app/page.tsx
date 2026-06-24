@@ -406,6 +406,38 @@ const products = [
   image: "https://i.pinimg.com/736x/d6/41/d6/d641d633b6091537c2f258fb7532d3c3.jpg",
   category: "accessories",
 }
+,
+  // Added from product list (unique to this PR, not in main)
+  { id: 157, name: "iPhone 15 Pro Max", price: 14500, image: "https://i.pinimg.com/736x/cb/2a/d0/cb2ad0bbc24149758f88797d22b54ab7.jpg", category: "smartphones" },
+  { id: 158, name: "Google Pixel 8 Pro", price: 9600, image: "https://i.pinimg.com/1200x/ed/93/e5/ed93e514854b5aac82409189a813db4e.jpg", category: "smartphones" },
+  { id: 159, name: "Xiaomi 14 Pro", price: 7400, image: "https://i.pinimg.com/736x/73/bc/9e/73bc9e39d2052a5a40535dc2d0d991f6.jpg", category: "smartphones" },
+  { id: 160, name: "OnePlus 12", price: 8200, image: "https://i.pinimg.com/736x/8b/0a/ff/8b0affab4dc57570bf6c3e717684332d.jpg", category: "smartphones" },
+  { id: 161, name: "Nothing Phone 2", price: 5500, image: "https://i.pinimg.com/736x/ab/cd/ef/abcdef1234567890abcdef1234567890.jpg", category: "smartphones" },
+  { id: 162, name: "Razer BlackWidow V4", price: 2200, image: "https://i.pinimg.com/736x/9c/2a/4b/9c2a4b3d5e6f7a8b9c0d1e2f3a4b5c6d.jpg", category: "gaming" },
+  { id: 163, name: "Logitech G Pro X", price: 2800, image: "https://i.pinimg.com/736x/f1/2e/8d/f12e8d3a4b5c6d7e8f9a0b1c2d3e4f5.jpg", category: "gaming" },
+  { id: 164, name: "USB Gaming mouse", price: 150, image: "https://i.pinimg.com/736x/3a/7b/9c/3a7b9c4d5e6f7a8b9c0d1e2f3a4b5c6d.jpg", category: "gaming" },
+  { id: 165, name: "Wireless Gaming Mouse", price: 190, image: "https://i.pinimg.com/1200x/f9/20/06/f920067f7d78218df227e9faaf7529ea.jpg", category: "gaming" },
+  { id: 166, name: "Ultra 3 Watch", price: 200, image: "/image/ulta.png", category: "smartwatches" },
+  { id: 167, name: "Garmin Fenix 7", price: 5500, image: "https://i.pinimg.com/736x/8d/4e/6a/8d4e6a7b8c9d0e1f2a3b4c5d6e7f8.jpg", category: "smartwatches" },
+  { id: 168, name: "Fitbit Sense 2", price: 2800, image: "https://i.pinimg.com/736x/9f/3a/7b/9f3a7b8c9d0e1f2a3b4c5d6e7f8a9.jpg", category: "smartwatches" },
+  { id: 169, name: "Amazfit GTR 4", price: 1500, image: "https://i.pinimg.com/736x/2b/6c/8d/2b6c8d9e0f1a2b3c4d5e6f7a8b9c0d.jpg", category: "smartwatches" },
+  { id: 170, name: "Instax Mini Evo", price: 850, image: "https://i.pinimg.com/736x/5c/7d/9e/5c7d9e0f1a2b3c4d5e6f7a8b9c.jpg", category: "cameras" },
+  { id: 171, name: "Amazon Echo Dot 5", price: 450, image: "https://i.pinimg.com/736x/6f/8a/cd/6f8acd0e1f2a3b4c5d6e7f8a9b0c.jpg", category: "smarthome" },
+  { id: 172, name: "Google Nest Hub", price: 1200, image: "https://i.pinimg.com/736x/1e/3a/5c/1e3a5c7d8e9f0a1b2c3d4e5f6a7.jpg", category: "smarthome" },
+  { id: 173, name: "Philips Hue Lights", price: 850, image: "https://i.pinimg.com/736x/8b/2c/4d/8b2c4d5e6f7a8b9c0d1e2f3a4.jpg", category: "smarthome" },
+  { id: 174, name: "Ring Video Doorbell", price: 2200, image: "https://i.pinimg.com/736x/3c/5d/7e/3c5d7e8f9a0b1c2d3e4f5a6b7.jpg", category: "smarthome" },
+  { id: 175, name: "TP-Link Smart Plug", price: 250, image: "https://i.pinimg.com/736x/7a/9c/1e/7a9c1e2f3a4b5c6d7e8f9a0b1.jpg", category: "smarthome" },
+  { id: 176, name: "Tecknet wireless keyboard", price: 200, image: "https://i.pinimg.com/1200x/15/4b/53/154b5391dfe3dbc05f09d2d7a158dcff.jpg", category: "accessories" },
+  { id: 177, name: "Power Bank 20000mAh", price: 205, image: "https://i.pinimg.com/736x/92/69/86/9269867d21c331a588a174385feea6fe.jpg", category: "accessories" },
+  { id: 178, name: "Logitech C920 Webcam", price: 450, image: "https://i.pinimg.com/1200x/1b/8c/1e/1b8c1e7a9c0d2f5b4a3c8e5b6f9a7c8.jpg", category: "accessories" },
+  { id: 179, name: "SanDisk 1TB SSD", price: 850, image: "https://i.pinimg.com/736x/4a/7b/9c/4a7b9c2d3e4f5a6b7c8d9e0f1a2b3.jpg", category: "accessories" },
+  { id: 180, name: "USB-C Hub 7-in-1", price: 450, image: "https://i.pinimg.com/736x/8c/3d/6f/8c3d6f0e1f2a3b4c5d6e7f8a9b0c1.jpg", category: "accessories" },
+  { id: 181, name: "Wireless Charger 15W", price: 350, image: "https://i.pinimg.com/736x/2e/5a/8b/2e5a8b3c4d5e6f7a8b9c0d1e2f3a4.jpg", category: "accessories" },
+  { id: 182, name: "Bluetooth Speaker JBL", price: 650, image: "https://i.pinimg.com/736x/9f/1a/4d/9f1a4d7e8f9a0b1c2d3e4f5a6b7.jpg", category: "accessories" },
+  { id: 183, name: "Cable Management Kit", price: 150, image: "https://i.pinimg.com/736x/6b/8c/1e/6b8c1e2f3a4b5c6d7e8f9a0b1c2.jpg", category: "accessories" },
+  { id: 184, name: "Apple MacBook Pro 16-inch", price: 9000, image: "https://i.pinimg.com/736x/5f/8a/3c/5f8a3c7d9e0f1a2b3c4d5e6f7a8.jpg", category: "laptops" },
+  { id: 185, name: "Apple iPad Pro 12.9-inch", price: 1000, image: "https://i.pinimg.com/736x/a7/b8/c9/a7b8c9d0e1f2a3b4c5d6e7f8a9b0c.jpg", category: "tablets" },
+  { id: 186, name: "Video Camera", price: 2530, image: "/image/vg.png", category: "cameras" }
 ]
 
 export default function ShoppingApp() {
@@ -498,7 +530,22 @@ export default function ShoppingApp() {
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Categories */}
         <div className="flex overflow-x-auto pb-2 mb-6 gap-2 scrollbar-hide">
-          {["All", "Electronics", "Fashion", "Home", "Fitness"].map((category) => (
+          {[
+            "All",
+            "Electronics",
+            "Fashion",
+            "Home",
+            "Fitness",
+            "smartphones",
+            "laptops",
+            "tablets",
+            "headphones",
+            "gaming",
+            "smartwatches",
+            "cameras",
+            "smarthome",
+            "accessories",
+          ].map((category) => (
             <button
               key={category}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
