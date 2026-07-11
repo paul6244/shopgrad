@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://your-domain.vercel.app'
+  const baseUrl = 'https://shopGrad.vecel.app'
   
   return [
     {

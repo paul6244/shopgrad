@@ -22,14 +22,14 @@ export const metadata: Metadata = {
   authors: [{ name: "ShopGrad" }],
   creator: "ShopGrad",
   publisher: "ShopGrad",
-  metadataBase: new URL("https://your-domain.vercel.app"),
+  metadataBase: new URL("https://shopGrad.vecel.app"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://your-domain.vercel.app",
+    url: "https://shopGrad.vecel.app",
     title: "ShopGrad - Your Favorite Shopping Destination",
     description: "Discover amazing deals on smartphones, laptops, headphones, gaming consoles, fashion items, and home essentials.",
     siteName: "ShopGrad",
