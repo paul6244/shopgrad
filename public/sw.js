@@ -1,9 +1,8 @@
-const CACHE_NAME = 'shopgrad-v1'
+const CACHE_NAME = 'shopgrad-v2'
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/icon.svg'
 ]
 
 self.addEventListener('install', event => {
