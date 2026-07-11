@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { CartProvider } from "@/hooks/use-cart"
@@ -10,6 +10,10 @@ import PWARegistration from "./pwa-registration"
 import StructuredData from "@/components/structured-data"
 
 const inter = Inter({ subsets: ["latin"] })
+
+export const viewport: Viewport = {
+  themeColor: "#f43f5e",
+}
 
 export const metadata: Metadata = {
   title: "ShopGrad - Your Favorite Shopping Destination | Best Deals on Electronics, Fashion & More",
@@ -57,7 +61,6 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/manifest.json",
-  themeColor: "#f43f5e",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
