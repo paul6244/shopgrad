@@ -129,7 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to send OTP')
+        // Create error object with response data for better handling
+        const errorObj = new Error(error.details || error.error || 'Failed to send OTP')
+        ;(errorObj as any).response = { data: error }
+        throw errorObj
       }
     } else {
       // Verify OTP phase

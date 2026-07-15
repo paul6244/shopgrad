@@ -45,8 +45,21 @@ export default function LoginPage() {
     try {
       await signupWithPhone(phone, undefined, otpMethod, otpMethod === "email" ? email : undefined)
       setOtpSent(true)
-    } catch (err) {
-      setError("Failed to send OTP. Please try again.")
+    } catch (err: any) {
+      // Handle different error types from API
+      if (err.response?.data) {
+        const errorData = err.response.data
+        setError(errorData.details || errorData.error || "Failed to send OTP. Please try again.")
+        
+        // If SMS is unavailable, suggest email
+        if (errorData.error === 'insufficient_balance' || errorData.error === 'invalid_coverage') {
+          if (otpMethod === 'sms') {
+            setError(`${errorData.details} Try switching to email verification.`)
+          }
+        }
+      } else {
+        setError("Failed to send OTP. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
@@ -193,22 +206,55 @@ export default function LoginPage() {
                   <Smartphone className="h-4 w-4 inline mr-2" />
                   SMS
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpMethod("email")
+                    setOtpSent(false)
+                    setError("")
+                  }}
+                  className={`flex-1 py-2 px-4 rounded-full font-medium transition-all ${
+                    otpMethod === "email"
+                      ? `${isDark ? 'bg-gray-600 text-rose-400' : 'bg-white text-rose-500'} shadow`
+                      : `${isDark ? 'text-gray-300' : 'text-gray-600'}`
+                  }`}
+                >
+                  <Mail className="h-4 w-4 inline mr-2" />
+                  Email
+                </button>
               </div>
 
-              <div className="relative">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Phone className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
+              {otpMethod === 'sms' ? (
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Phone className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder="+233XXXXXXXXX"
+                    className={`w-full py-3 pl-12 pr-4 rounded-full border focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent ${isDark ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-50 text-gray-700 border-gray-200'}`}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={otpSent}
+                    required
+                  />
                 </div>
-                <input
-                  type="tel"
-                  placeholder="+233XXXXXXXXX"
-                  className={`w-full py-3 pl-12 pr-4 rounded-full border focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent ${isDark ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-50 text-gray-700 border-gray-200'}`}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={otpSent}
-                  required
-                />
-              </div>
+              ) : (
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Mail className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="Enter email"
+                    className={`w-full py-3 pl-12 pr-4 rounded-full border focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent ${isDark ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-50 text-gray-700 border-gray-200'}`}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={otpSent}
+                    required
+                  />
+                </div>
+              )}
 
               {!otpSent ? (
                 <button
@@ -235,6 +281,16 @@ export default function LoginPage() {
                       required
                     />
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false)
+                      setError("")
+                    }}
+                    className="text-sm text-rose-500 hover:text-rose-600 mt-2"
+                  >
+                    Resend OTP
+                  </button>
                 </>
               )}
             </>

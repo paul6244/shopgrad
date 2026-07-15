@@ -57,7 +57,11 @@ export async function POST(request: NextRequest) {
           console.log('OTP stored in database successfully')
         } catch (dbError: any) {
           console.error('Failed to store OTP in database:', dbError)
-          // Continue anyway - OTP will still be sent
+          return NextResponse.json({ 
+            error: 'Database error',
+            details: 'Failed to store OTP. Please try again.',
+            retryable: true
+          }, { status: 500 })
         }
         
         // Send OTP via Arkesel
@@ -67,15 +71,42 @@ export async function POST(request: NextRequest) {
         
         return NextResponse.json({ 
           success: true, 
-          message: 'OTP sent successfully via Arkesel SMS',
+          message: 'OTP sent successfully via SMS',
           method: 'sms',
           arkeselResponse: arkeselResult
         })
       } catch (arkeselError: any) {
         console.error('Arkesel error:', arkeselError)
+        
+        // Determine specific error type
+        let errorType = 'unknown'
+        let userMessage = 'Failed to send OTP. Please try again.'
+        let canRetry = true
+        
+        const errorMessage = arkeselError.message || ''
+        
+        if (errorMessage.includes('Insufficient balance') || errorMessage.includes('insufficient balance')) {
+          errorType = 'insufficient_balance'
+          userMessage = 'SMS service is temporarily unavailable. Please try email verification instead.'
+          canRetry = false
+        } else if (errorMessage.includes('invalid coverage') || errorMessage.includes('No valid number')) {
+          errorType = 'invalid_coverage'
+          userMessage = 'This phone number is not supported. Please try email verification instead.'
+          canRetry = false
+        } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT') || errorMessage.includes('Connect Timeout') || errorMessage.includes('ECONNRESET')) {
+          errorType = 'timeout'
+          userMessage = 'Connection error. Please check your network and try again, or use email verification.'
+        } else if (errorMessage.includes('Invalid phone')) {
+          errorType = 'invalid_phone'
+          userMessage = 'Invalid phone number format. Please check and try again.'
+          canRetry = false
+        }
+        
         return NextResponse.json({ 
-          error: 'Failed to send OTP via Arkesel',
-          details: arkeselError.message || 'Unknown error'
+          error: errorType,
+          details: userMessage,
+          retryable: canRetry,
+          originalError: errorMessage
         }, { status: 500 })
       }
     }
