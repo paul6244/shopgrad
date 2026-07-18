@@ -27,10 +27,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   // Load favorites from localStorage when component mounts or user changes
   useEffect(() => {
-    if (user) {
-      const storedFavorites = localStorage.getItem(`favorites-${user.id}`)
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites))
+    if (user && typeof window !== 'undefined') {
+      try {
+        const storedFavorites = localStorage.getItem(`favorites-${user.id}`)
+        if (storedFavorites) {
+          setFavorites(JSON.parse(storedFavorites))
+        }
+      } catch (error) {
+        console.error('Failed to read favorites from localStorage:', error)
       }
     } else {
       setFavorites([])
@@ -39,8 +43,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   // Save favorites to localStorage whenever they change
   useEffect(() => {
-    if (user) {
-      localStorage.setItem(`favorites-${user.id}`, JSON.stringify(favorites))
+    if (user && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(`favorites-${user.id}`, JSON.stringify(favorites))
+      } catch (error) {
+        console.error('Failed to save favorites to localStorage:', error)
+      }
     }
   }, [favorites, user])
 
