@@ -42,7 +42,7 @@ export default function ProductCard({
 
   if (!mounted) return null
 
-  const isDark = theme === "dark"
+  const isDark = theme === "dark" || false
 
   const handleFavoriteToggle = () => {
     if (isProductFavorite) {

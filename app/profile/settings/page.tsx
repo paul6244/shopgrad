@@ -25,18 +25,22 @@ export default function SettingsPage() {
   }, [])
 
   useEffect(() => {
-    if (user) {
+    if (user && typeof window !== 'undefined') {
       setName(user.name)
       setEmail(user.email)
       setPhone(user.phone || "")
       // Load settings from localStorage
-      const storedSettings = localStorage.getItem(`settings-${user.id}`)
-      if (storedSettings) {
-        const settings = JSON.parse(storedSettings)
-        setNotifications(settings.notifications ?? true)
-        setEmailPromotions(settings.emailPromotions ?? false)
-        setDarkMode(settings.darkMode ?? false)
-        setLanguage(settings.language ?? "en")
+      try {
+        const storedSettings = localStorage.getItem(`settings-${user.id}`)
+        if (storedSettings) {
+          const settings = JSON.parse(storedSettings)
+          setNotifications(settings.notifications ?? true)
+          setEmailPromotions(settings.emailPromotions ?? false)
+          setDarkMode(settings.darkMode ?? false)
+          setLanguage(settings.language ?? "en")
+        }
+      } catch (error) {
+        console.error('Failed to read settings from localStorage:', error)
       }
     }
   }, [user])
@@ -73,7 +77,13 @@ export default function SettingsPage() {
           darkMode,
           language,
         }
-        localStorage.setItem(`settings-${user.id}`, JSON.stringify(settings))
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(`settings-${user.id}`, JSON.stringify(settings))
+          } catch (error) {
+            console.error('Failed to save settings to localStorage:', error)
+          }
+        }
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
       } catch (error) {
@@ -91,33 +101,45 @@ export default function SettingsPage() {
   const handleDeleteAccount = () => {
     if (user) {
       // In a real app, this would make an API call
-      localStorage.removeItem(`user`)
-      localStorage.removeItem(`settings-${user.id}`)
-      localStorage.removeItem(`favorites-${user.id}`)
-      localStorage.removeItem(`orders-${user.id}`)
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem(`user`)
+          localStorage.removeItem(`settings-${user.id}`)
+          localStorage.removeItem(`favorites-${user.id}`)
+          localStorage.removeItem(`orders-${user.id}`)
+        } catch (error) {
+          console.error('Failed to clear localStorage:', error)
+        }
+      }
       logout()
-      window.location.href = "/"
+      if (typeof window !== 'undefined') {
+        window.location.href = "/"
+      }
     }
   }
 
   const handleExportData = () => {
-    if (user) {
-      const data = {
-        profile: user,
-        favorites: JSON.parse(localStorage.getItem(`favorites-${user.id}`) || "[]"),
-        orders: JSON.parse(localStorage.getItem(`orders-${user.id}`) || "[]"),
-        settings: JSON.parse(localStorage.getItem(`settings-${user.id}`) || "{}"),
+    if (user && typeof window !== 'undefined') {
+      try {
+        const data = {
+          profile: user,
+          favorites: JSON.parse(localStorage.getItem(`favorites-${user.id}`) || "[]"),
+          orders: JSON.parse(localStorage.getItem(`orders-${user.id}`) || "[]"),
+          settings: JSON.parse(localStorage.getItem(`settings-${user.id}`) || "{}"),
+        }
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `shopgrad-data-${user.id}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('Failed to export data:', error)
       }
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `shopgrad-data-${user.id}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
     }
   }
 
@@ -125,7 +147,7 @@ export default function SettingsPage() {
     return null
   }
 
-  const isDark = theme === "dark"
+  const isDark = theme === "dark" || false
 
   return (
     <div className={`flex flex-col min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gradient-to-b from-rose-200 via-rose-300 to-purple-500'}`}>

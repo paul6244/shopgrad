@@ -21,11 +21,15 @@ export default function OrdersPage() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
 
   useEffect(() => {
-    if (user) {
-      // Load orders from localStorage
-      const storedOrders = localStorage.getItem(`orders-${user.id}`)
-      if (storedOrders) {
-        setOrders(JSON.parse(storedOrders))
+    if (user && typeof window !== 'undefined') {
+      try {
+        // Load orders from localStorage
+        const storedOrders = localStorage.getItem(`orders-${user.id}`)
+        if (storedOrders) {
+          setOrders(JSON.parse(storedOrders))
+        }
+      } catch (error) {
+        console.error('Failed to read orders from localStorage:', error)
       }
     }
   }, [user])
@@ -122,10 +126,14 @@ export default function OrdersPage() {
           </div>
           <button
             onClick={() => {
-              if (user) {
-                const storedOrders = localStorage.getItem(`orders-${user.id}`)
-                if (storedOrders) {
-                  setOrders(JSON.parse(storedOrders))
+              if (user && typeof window !== 'undefined') {
+                try {
+                  const storedOrders = localStorage.getItem(`orders-${user.id}`)
+                  if (storedOrders) {
+                    setOrders(JSON.parse(storedOrders))
+                  }
+                } catch (error) {
+                  console.error('Failed to refresh orders from localStorage:', error)
                 }
               }
             }}

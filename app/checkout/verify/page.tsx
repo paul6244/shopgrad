@@ -33,17 +33,21 @@ export default function VerifyPaymentPage() {
           setMessage("Payment verified successfully!")
 
           // Save order to localStorage
-          if (user && response.data?.metadata) {
-            const orders = JSON.parse(localStorage.getItem(`orders-${user.id}`) || "[]")
-            const newOrder = {
-              id: response.data.metadata.orderId || reference,
-              date: new Date().toLocaleDateString(),
-              status: "processing" as const,
-              total: response.data.metadata.total || 0,
-              items: response.data.metadata.items || 0,
+          if (user && response.data?.metadata && typeof window !== 'undefined') {
+            try {
+              const orders = JSON.parse(localStorage.getItem(`orders-${user.id}`) || "[]")
+              const newOrder = {
+                id: response.data.metadata.orderId || reference,
+                date: new Date().toLocaleDateString(),
+                status: "processing" as const,
+                total: response.data.metadata.total || 0,
+                items: response.data.metadata.items || 0,
+              }
+              orders.unshift(newOrder)
+              localStorage.setItem(`orders-${user.id}`, JSON.stringify(orders))
+            } catch (error) {
+              console.error('Failed to save order to localStorage:', error)
             }
-            orders.unshift(newOrder)
-            localStorage.setItem(`orders-${user.id}`, JSON.stringify(orders))
           }
 
           clearCart()

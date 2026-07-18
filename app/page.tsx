@@ -431,7 +431,7 @@ export default function ShoppingApp() {
 
   if (!mounted) return null
 
-  const isDark = theme === "dark"
+  const isDark = theme === "dark" || false
 
   const filteredProducts = products.filter(
     (product) =>
